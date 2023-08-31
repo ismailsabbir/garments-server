@@ -21,6 +21,9 @@ async function run() {
     const blogcollections = client
       .db("garmentsinformation")
       .collection("blogs");
+    const membercollections = client
+      .db("garmentsinformation")
+      .collection("members");
 
     app.get("/services", async (req, res) => {
       const query = {};
@@ -36,6 +39,11 @@ async function run() {
       const query = {};
       const blogs = await blogcollections.find(query).toArray();
       res.send(blogs);
+    });
+    app.get("/members", async (req, res) => {
+      const query = {};
+      const members = await membercollections.find(query).toArray();
+      res.send(members);
     });
 
     app.get("/", (req, res) => {
