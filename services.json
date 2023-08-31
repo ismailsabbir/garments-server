@@ -1,0 +1,183 @@
+[
+    {
+      "picture": "https://i.ibb.co/8MZqJVK/Service-2.png",
+      "image":"https://i.ibb.co/fpccvYJ/fabric.jpg",
+      "name": "Fabric Dyeing",
+      "process":[
+        {
+            "name":"Preparation",
+            "process":"The fabric is usually cleaned and pre-treated to remove any impurities, oils, or finishes that could interfere with dye uptake. This might involve processes like scouring and bleaching."
+        },
+        {
+            "name":"Dyeing",
+            "process":"The fabric is immersed in a dye bath containing the chosen dye. The dye bath is heated and agitated to ensure even dye distribution. The dye molecules bond with the fabric fibers to impart color."
+        },
+        {
+            "name":"Rinsing",
+            "process":" After dyeing, the fabric is rinsed thoroughly to remove excess dye and any unattached dye molecules. This step helps improve color fastness and prevents bleeding."
+        },
+        {
+            "name":"Fixation",
+            "process":"Depending on the type of dye, some fabrics might require a fixing agent or mordant to enhance color fastness. This step helps the dye molecules remain securely attached to the fabric."
+        },
+        {
+            "name":"Color Fastness Testing",
+            "process":"  Quality control involves testing the dyed fabric's color fastness to factors like light, washing, rubbing, and perspiration. This ensures that the dyed fabric retains its color and appearance over time."
+        }
+
+      ],
+      "about": "Duis pellentesque mi nec iaculis sed convallis. Cras sed tellus ipsum. Fabric dyeing is a process in which color is applied to textiles or fabrics to achieve a desired hue. It's a crucial step in the production of colored garments and textiles. There are various methods and types of dyes used for fabric dyeing, each with its own advantages and limitations. Here's an overview of the fabric dyeing process",
+      "types":["Direct Dyes","Reactive Dyes","Disperse Dyes","Acid Dyes","Vat Dyes","Sulfur Dyes","Basic Dyes"]
+
+    },
+    {
+      "picture": "https://i.ibb.co/4KTMv5k/Service-3.png",
+      "image":"https://i.ibb.co/7g0QQfY/stain.jpg",
+      "name": "Satin Weaving",
+      "process":[
+        {
+            "name":"Design Creation",
+            "process":"The process begins with designing the pattern that will be woven into the fabric. This can be done using specialized software that allows the designer to create intricate designs, motifs, or images."
+        },
+        {
+            "name":"Jacquard Loom Setup",
+            "process":"The jacquard loom is a complex weaving machine that controls individual warp threads to create the desired pattern. The pattern design is programmed into the loom using punch cards, computerized systems, or other modern methods."
+        },
+        {
+            "name":"Warp Preparation",
+            "process":"Warp yarns are selected based on the desired characteristics of the final fabric. The warp threads are then threaded through the harnesses of the jacquard loom, with each harness controlling a specific set of warp threads."
+        },
+        {
+            "name":"Weft Insertion",
+            "process":"The weft yarn is inserted through the shed using a shuttle or other weaving tool. Depending on the design, the weft yarn might be a different color or texture from the warp yarns."
+        },
+        {
+            "name":". Finishing",
+            "process":"Once the weaving is complete, the fabric is removed from the loom. It undergoes finishing processes such as washing, steaming, and pressing to achieve the desired texture and appearance. These steps help to set the weave and bring out the pattern's details."
+        }
+
+      ],
+      "about": "Duis pellentesque mi nec iaculis sed convallis. Cras sed tellus ipsum. ",
+      "types":["Charmeuse Satin","Crepe-Back Satin","Duchesse Satin","Satin Georgette","Bridal Satin","Satin Jacquard"]
+    },
+    {
+      "picture": "https://i.ibb.co/5Fc0xRY/Service-6.png",
+      "image":"https://i.ibb.co/8xRPpYk/printing.jpg",
+      "name": "Fabric Printing",
+      "process":[
+        {
+            "name":"Design Creation",
+            "process":"The process begins with designing the pattern or artwork that will be printed onto the fabric. This design can be created using various methods, such as hand-drawing, digital illustration, or computer software."
+        },
+        {
+            "name":"Color Separation",
+            "process":"For designs with multiple colors, color separation is often required. This involves breaking down the design into individual color components, which will later be used to create printing screens or plates for each color."
+        },
+        {
+            "name":"Printing Method Selection",
+            "process":"Choose the appropriate printing method based on the desired outcome, fabric type, and complexity of the design"
+        },
+        {
+            "name":"Drying and Curing",
+            "process":"After printing, the fabric is dried or cured to set the ink or dye. This step is crucial for ensuring colorfastness and durability."
+        },
+        {
+            "name":"Finishing",
+            "process":"The printed fabric might undergo additional finishing processes, such as washing, steaming, or applying fixatives, to set the colors and improve the fabric's hand feel."
+        }
+
+      ],
+      "about": "Duis pellentesque mi nec iaculis sed convallis. Cras sed tellus ipsum.Fabric printing is a process of applying designs, patterns, or images onto fabric surfaces using various printing techniques. Printing can enhance the aesthetic appeal of garments and textiles, allowing for creative customization. Here's an overview of the process of fabric printing in garments ",
+      "types":["Screen Printing","Digital Printing","Block Printing","Rotary Printing","Heat Transfer Printing"]
+     },
+    {
+        "picture": "https://i.ibb.co/qs1SmtW/Service-4.png",
+        "image":"https://i.ibb.co/h1m58qP/details.jpg",
+        "name": "Garment Stitching",
+        "process":[
+            {
+                "name":"Fabric Selection and Cutting",
+                "process":"Select the appropriate fabric based on the pattern's fabric recommendations.Lay out the pattern pieces on the fabric, pin them down, and cut along the pattern lines."
+            },
+            {
+                "name":"Marking and Preparation",
+                "process":"Mark any notches, darts, pleats, buttonholes, and other important points on the fabric using tailor's chalk, markers, or pins.Transfer pattern markings indicating stitching lines, seam allowances, and hemlines."
+            },
+            {
+                "name":"Seam Construction",
+                "process":"Start sewing the main garment seams, matching notches and aligning edges.Stitch the fabric pieces right sides together using the recommended seam allowance and stitching technique (e.g., straight stitch, zigzag, overlock).Press open or press to one side the sewn seams to set the stitches and create a neat finish."
+            },
+            {
+                "name":"Attaching Closures",
+                "process":"Attach closures such as zippers, buttons, snaps, or hooks and eyes at the designated areas according to the pattern.Make sure closures are secure and aligned correctly."
+            },
+            {
+                "name":"Finishing Touches",
+                "process":"Trim any loose threads and press the garment to set stitches and achieve a polished look.Check for stitching errors, irregularities, or fit issues."
+            }
+    
+          ],
+          "about": "Duis pellentesque mi nec iaculis sed convallis. Cras sed tellus ipsum.The process of garment stitching involves assembling fabric pieces together using various stitching techniques to create a complete garment. This process requires careful planning, precise execution, and attention to detail. Here's an overview of the general steps involved in garment stitching ",
+          "types":["The Running Stitch","The Basting Stitch","The Cross Stitch","The Back Stitch","The Slip Stitch","he Blanket Stitch","The Zigzag Stitch"]
+          },
+      {
+        "picture": "https://i.ibb.co/x2crTZq/Service-5.png",
+        "image":"https://i.ibb.co/myCqzBm/line.jpg",
+        "name": "Linen Weaving",
+        "process":[
+            {
+                "name":"Design Creation",
+                "process":"The process begins with designing the pattern that will be woven into the fabric. This can be done using specialized software that allows the designer to create intricate designs, motifs, or images."
+            },
+            {
+                "name":"Jacquard Loom Setup",
+                "process":"The jacquard loom is a complex weaving machine that controls individual warp threads to create the desired pattern. The pattern design is programmed into the loom using punch cards, computerized systems, or other modern methods."
+            },
+            {
+                "name":"Warp Preparation",
+                "process":"Warp yarns are selected based on the desired characteristics of the final fabric. The warp threads are then threaded through the harnesses of the jacquard loom, with each harness controlling a specific set of warp threads."
+            },
+            {
+                "name":"Weft Insertion",
+                "process":"The weft yarn is inserted through the shed using a shuttle or other weaving tool. Depending on the design, the weft yarn might be a different color or texture from the warp yarns."
+            },
+            {
+                "name":". Finishing",
+                "process":"Once the weaving is complete, the fabric is removed from the loom. It undergoes finishing processes such as washing, steaming, and pressing to achieve the desired texture and appearance. These steps help to set the weave and bring out the pattern's details."
+            }
+    
+          ],
+          "about": "Linen weaving refers to the process of creating fabric using linen fibers, which are derived from the flax plant (Linum usitatissimum). Linen is a natural fiber known for its strength, breathability, and ability to keep cool in hot weather. Linen fabrics are often appreciated for their textured appearance and classic aesthetic.In linen weaving, flax fibers are spun into yarn, and these yarns are then woven together on a loom to form fabric. Various weaving patterns and techniques can be applied to create different textures and designs in the fabric. Linen fabrics can range from lightweight and sheer to heavier and more durable, making them suitable for a wide range of applications, including clothing, home textiles, and more.",
+          "types":["The Plain Weave","The Twill Weave","The Herringbone Weave","The Jacquard Weave","The Bird's Eye Weave","The  Lenoweave (Lino Weave)"]
+         },
+      {
+        "picture": "https://i.ibb.co/M1cKjrH/Service-1.png",
+        "image":"https://i.ibb.co/6PGB8gf/last.jpg",
+        "name": "Custom Apparel",
+        "process":[
+            {
+                "name":"Design Creation",
+                "process":"The process begins with designing the pattern that will be woven into the fabric. This can be done using specialized software that allows the designer to create intricate designs, motifs, or images."
+            },
+            {
+                "name":"Jacquard Loom Setup",
+                "process":"The jacquard loom is a complex weaving machine that controls individual warp threads to create the desired pattern. The pattern design is programmed into the loom using punch cards, computerized systems, or other modern methods."
+            },
+            {
+                "name":"Warp Preparation",
+                "process":"Warp yarns are selected based on the desired characteristics of the final fabric. The warp threads are then threaded through the harnesses of the jacquard loom, with each harness controlling a specific set of warp threads."
+            },
+            {
+                "name":"Weft Insertion",
+                "process":"The weft yarn is inserted through the shed using a shuttle or other weaving tool. Depending on the design, the weft yarn might be a different color or texture from the warp yarns."
+            },
+            {
+                "name":". Finishing",
+                "process":"Once the weaving is complete, the fabric is removed from the loom. It undergoes finishing processes such as washing, steaming, and pressing to achieve the desired texture and appearance. These steps help to set the weave and bring out the pattern's details."
+            }
+    
+          ],
+          "about": "Linen weaving refers to the process of creating fabric using linen fibers, which are derived from the flax plant (Linum usitatissimum). Linen is a natural fiber known for its strength, breathability, and ability to keep cool in hot weather. Linen fabrics are often appreciated for their textured appearance and classic aesthetic.In linen weaving, flax fibers are spun into yarn, and these yarns are then woven together on a loom to form fabric. Various weaving patterns and techniques can be applied to create different textures and designs in the fabric. Linen fabrics can range from lightweight and sheer to heavier and more durable, making them suitable for a wide range of applications, including clothing, home textiles, and more.",
+          "types":[]
+          }
+  ]
