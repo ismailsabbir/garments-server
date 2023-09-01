@@ -2,6 +2,7 @@
     {
       "picture": "https://i.ibb.co/8MZqJVK/Service-2.png",
       "image":"https://i.ibb.co/fpccvYJ/fabric.jpg",
+      "image1": "https://i.ibb.co/y8cdZzr/deying.jpg",
       "name": "Fabric Dyeing",
       "process":[
         {
@@ -27,12 +28,13 @@
 
       ],
       "about": "Duis pellentesque mi nec iaculis sed convallis. Cras sed tellus ipsum. Fabric dyeing is a process in which color is applied to textiles or fabrics to achieve a desired hue. It's a crucial step in the production of colored garments and textiles. There are various methods and types of dyes used for fabric dyeing, each with its own advantages and limitations. Here's an overview of the fabric dyeing process",
-      "types":["Direct Dyes","Reactive Dyes","Disperse Dyes","Acid Dyes","Vat Dyes","Sulfur Dyes","Basic Dyes"]
+      "types":["The Direct Dyes","The Reactive Dyes","The Disperse Dyes","The Acid Dyes","The Vat Dyes","The Sulfur Dyes","The Basic Dyes"]
 
     },
     {
       "picture": "https://i.ibb.co/4KTMv5k/Service-3.png",
       "image":"https://i.ibb.co/7g0QQfY/stain.jpg",
+      "image1": "https://i.ibb.co/K6Yp3KJ/stain1.jpg",
       "name": "Satin Weaving",
       "process":[
         {
@@ -58,11 +60,12 @@
 
       ],
       "about": "Duis pellentesque mi nec iaculis sed convallis. Cras sed tellus ipsum. ",
-      "types":["Charmeuse Satin","Crepe-Back Satin","Duchesse Satin","Satin Georgette","Bridal Satin","Satin Jacquard"]
+      "types":["The Charmeuse Satin","The Crepe-Back Satin","The Duchesse Satin","The Satin Georgette","The Bridal Satin","The Satin Jacquard"]
     },
     {
       "picture": "https://i.ibb.co/5Fc0xRY/Service-6.png",
       "image":"https://i.ibb.co/8xRPpYk/printing.jpg",
+      "image1": "https://i.ibb.co/FXg5BSZ/printing1.jpg",
       "name": "Fabric Printing",
       "process":[
         {
@@ -88,11 +91,12 @@
 
       ],
       "about": "Duis pellentesque mi nec iaculis sed convallis. Cras sed tellus ipsum.Fabric printing is a process of applying designs, patterns, or images onto fabric surfaces using various printing techniques. Printing can enhance the aesthetic appeal of garments and textiles, allowing for creative customization. Here's an overview of the process of fabric printing in garments ",
-      "types":["Screen Printing","Digital Printing","Block Printing","Rotary Printing","Heat Transfer Printing"]
+      "types":["The Screen Printing","The Digital Printing","The Block Printing","The Rotary Printing","The Heat Transfer Printing"]
      },
     {
         "picture": "https://i.ibb.co/qs1SmtW/Service-4.png",
         "image":"https://i.ibb.co/h1m58qP/details.jpg",
+        "image1": "https://i.ibb.co/cbWPtWh/switching1.jpg",
         "name": "Garment Stitching",
         "process":[
             {
@@ -123,6 +127,7 @@
       {
         "picture": "https://i.ibb.co/x2crTZq/Service-5.png",
         "image":"https://i.ibb.co/myCqzBm/line.jpg",
+        "image1": "https://i.ibb.co/3cdM2Vg/line1.jpg",
         "name": "Linen Weaving",
         "process":[
             {
@@ -153,6 +158,7 @@
       {
         "picture": "https://i.ibb.co/M1cKjrH/Service-1.png",
         "image":"https://i.ibb.co/6PGB8gf/last.jpg",
+        "image1": "https://i.ibb.co/W2W5Ph0/custom1.jpg",
         "name": "Custom Apparel",
         "process":[
             {
@@ -178,6 +184,6 @@
     
           ],
           "about": "Linen weaving refers to the process of creating fabric using linen fibers, which are derived from the flax plant (Linum usitatissimum). Linen is a natural fiber known for its strength, breathability, and ability to keep cool in hot weather. Linen fabrics are often appreciated for their textured appearance and classic aesthetic.In linen weaving, flax fibers are spun into yarn, and these yarns are then woven together on a loom to form fabric. Various weaving patterns and techniques can be applied to create different textures and designs in the fabric. Linen fabrics can range from lightweight and sheer to heavier and more durable, making them suitable for a wide range of applications, including clothing, home textiles, and more.",
-          "types":[]
+          "types":["The Plain Weave","The Twill Weave","The Herringbone Weave","The Jacquard Weave","The Bird's Eye Weave","The  Lenoweave (Lino Weave)"]
           }
   ]
