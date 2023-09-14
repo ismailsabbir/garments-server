@@ -24,6 +24,9 @@ async function run() {
     const membercollections = client
       .db("garmentsinformation")
       .collection("members");
+    const categorycollections = client
+      .db("garmentsinformation")
+      .collection("project-category");
 
     app.get("/services", async (req, res) => {
       const query = {};
@@ -46,6 +49,11 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const project = await projectscollections.findOne(query);
       res.send(project);
+    });
+    app.get("/project-category", async (req, res) => {
+      const query = {};
+      const category = await categorycollections.find(query).toArray();
+      res.send(category);
     });
     app.get("/blogs", async (req, res) => {
       const query = {};

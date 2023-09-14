@@ -1,0 +1,38 @@
+[
+    {
+        "category-id":"01",
+        "name":"T-Shirt",
+        "image":"https://i.ibb.co/k3qVhFt/t-shart.jpg",
+        "text":"Get custom t-shirt with your design Printed on it."
+    },
+    {
+        "category-id":"02",
+        "name":"Polo",
+        "image":"https://i.ibb.co/D47q142/polo1.jpg",
+        "text":"Get custom polp with your design Printed on it."
+    },
+    {
+        "category-id":"03",
+        "name":"Jersey",
+        "image":"https://i.ibb.co/Nj7GHFk/jersey.jpg",
+        "text":"Get custom jersey with your design Printed on it."
+    },
+    {
+        "category-id":"04",
+        "name":"Cap",
+        "image":"https://i.ibb.co/hX1mWwD/cap.jpg",
+        "text":"Get custom cap with your design Printed on it."
+    },
+    {
+        "category-id":"05",
+        "name":"Shirt",
+        "image":"https://i.ibb.co/DrWn1sz/shirt.jpg",
+        "text":"Get custom Shirt with your design Printed on it."
+    },
+    {
+        "category-id":"05",
+        "name":"Hoodie",
+        "image":"https://i.ibb.co/W2W5Ph0/custom1.jpg",
+        "text":"Get custom hoodie with your design Printed on it."
+    }
+]
