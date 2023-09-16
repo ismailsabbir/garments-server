@@ -1,0 +1,23 @@
+[
+    {
+        "quality_id":"1",
+        "name":"Budget",
+        "gsm":"110-120",
+        "wash":"5",
+        "use":"one-time"
+    },
+    {
+        "quality_id":"2",
+        "name":"Regular",
+        "gsm":"140-150",
+        "wash":"15",
+        "use":"multiple-time"
+    },
+    {
+        "quality_id":"3",
+        "name":"Premium",
+        "gsm":"170-180",
+        "wash":"30",
+        "use":"regular"
+    }
+]

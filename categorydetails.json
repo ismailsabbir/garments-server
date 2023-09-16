@@ -1,42 +1,237 @@
 [
     {
-        "category-id":"01",
+        "category_id":"01",
+        "name":"T-Shirt",
+        "availavle":"100",
         "Default_image":"https://i.ibb.co/jL20J8V/whitet-shart.webp",
-        "white_image":"https://i.ibb.co/jL20J8V/whitet-shart.webp",
-        "black_image":"https://i.ibb.co/S6V43yw/blackt-shart.webp",
-        "blue-image":"https://i.ibb.co/SJychV0/bluet-shart.webp",
-        "orange_image":"https://i.ibb.co/4t8YdyW/oranget-shart.webp",
-        "brown_image":"https://i.ibb.co/zHCRM4Q/brownt-shart.jpg",
-        "green-image":"https://i.ibb.co/9tJgYd7/greant-shart.jpg",
-        "dark_blue_image":"https://i.ibb.co/fF0Z6p5/blue1t-shart.webp",
-        "read_image":"https://i.ibb.co/2hGjP58/readt-shart.jpg",
         "colors":[
             {
-                "white_color":""
+                "color_id":"1",
+                "color_name":"white",
+                "color":"https://i.ibb.co/h2xL013/white.jpg"
             },
             {
-                "black_color":""
+                "color_id":"3",
+                "color_name":"black",
+                "color":"https://i.ibb.co/vXvcPBk/black.png"
             },
             {
-                "blue_color":""
+                "color_id":"4",
+                "color_name":"blue",
+                "color":"https://i.ibb.co/CB9XSmC/blue.jpg"
             },
             {
-                "orange_color":""
+                "color_id":"5",
+                "color_name":"navi-blue",
+                "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp"
             },
             {
-                "brown_color":""
+                "color_id":"8",
+                "color_name":"orange",
+                "color":"https://i.ibb.co/YNJX1f1/orange.jpg"
             },
             {
-                "green_color":""
+                "color_id":"9",
+                "color_name":"red",
+                "color":"https://i.ibb.co/5kGHbJP/read.jpg"
             },
             {
-                "dark-blue_color":""
+                "color_id":"10",
+                "color_name":"pink",
+                "color":"https://i.ibb.co/VCBmrfZ/pink.jpg"
             },
             {
-                "read_color":""
+                "color_id":"11",
+                "color_name":"brown",
+                "color":"https://i.ibb.co/d0rLZv8/brown.jpg"
+            },
+            {
+                "color_id":"12",
+                "color_name":"green",
+                "color":"https://i.ibb.co/yPCxWzs/green.png"
+                
             }
+
         ],
         "default_price":"120",
         "custom_price":"150"
+    },
+    {
+        "category_id":"02",
+        "name":"Polo",  
+        "availavle":"100",
+        "Default_image":"https://i.ibb.co/61ZL7n0/white-polp.webp",
+        "colors":[
+            {
+                "color_id":"1",
+                "color_name":"white",
+                "color":"https://i.ibb.co/h2xL013/white.jpg"
+            },
+            {
+                "color_id":"3",
+                "color_name":"black",
+                "color":"https://i.ibb.co/vXvcPBk/black.png"
+            },
+            {
+                "color_id":"4",
+                "color_name":"blue",
+                "color":"https://i.ibb.co/CB9XSmC/blue.jpg"
+            },
+            {
+                "color_id":"5",
+                "color_name":"navi-blue",
+                "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp"
+            },
+
+            {
+                "color_id":"8",
+                "color_name":"orange",
+                "color":"https://i.ibb.co/YNJX1f1/orange.jpg"
+            },
+
+            {
+                "color_id":"11",
+                "color_name":"brown",
+                "color":"https://i.ibb.co/d0rLZv8/brown.jpg"
+            },
+            {
+                "color_id":"12",
+                "color_name":"green",
+                "color":"https://i.ibb.co/yPCxWzs/green.png"
+                
+            }
+
+        ],
+        "default_price":"120",
+        "custom_price":"150"
+    },
+    {
+        "category_id":"03",
+        "name":"Jersey",
+        "availavle":"100",
+        "Default_image":"https://i.ibb.co/vhRNwMC/white-jersey.jpg",
+        "colors":[
+            {
+                "color_id":"1",
+                "color_name":"white",
+                "color":"https://i.ibb.co/h2xL013/white.jpg"
+            },
+
+            {
+                "color_id":"3",
+                "color_name":"black",
+                "color":"https://i.ibb.co/vXvcPBk/black.png"
+            },
+            {
+                "color_id":"7",
+                "color_name":"yellow",
+                "color":"https://i.ibb.co/nLbpZt4/yellow.jpg"
+            }
+
+        ],
+        "default_price":"120",
+        "custom_price":"150"
+    },
+    {
+        "category_id":"04",
+        "name":"Cap",  
+        "availavle":"100",
+        "Default_image":"https://i.ibb.co/djqByRq/white-cap.jpg",
+        "colors":[
+            {
+                "color_id":"1",
+                "color_name":"white",
+                "color":"https://i.ibb.co/h2xL013/white.jpg"
+            },
+            {
+                "color_id":"3",
+                "color_name":"black",
+                "color":"https://i.ibb.co/vXvcPBk/black.png"
+            },
+            {
+                "color_id":"5",
+                "color_name":"navi-blue",
+                "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp"
+            },
+            {
+                "color_id":"6",
+                "color_name":"sky-blue",
+                "color":"https://i.ibb.co/yQgXpCf/skyblue.jpg"
+            },
+            {
+                "color_id":"9",
+                "color_name":"red",
+                "color":"https://i.ibb.co/5kGHbJP/read.jpg"
+            },
+            {
+                "color_id":"10",
+                "color_name":"pink",
+                "color":"https://i.ibb.co/VCBmrfZ/pink.jpg"
+            }
+
+        ],
+        "default_price":"100",
+        "custom_price":"120"
+    },
+    {
+        "category_id":"05",
+        "name":"Shirt",
+        "availavle":"100",
+        "Default_image":"https://i.ibb.co/X7QcqdW/white-shirt.jpg",
+        "colors":[
+            {
+                "color_id":"1",
+                "color_name":"white",
+                "color":"https://i.ibb.co/h2xL013/white.jpg"
+            },
+            {
+                "color_id":"2",
+                "color_name":"gray",
+                "color":"https://i.ibb.co/Ytb5Wvs/grat.jpg"
+            },
+            {
+                "color_id":"6",
+                "color_name":"sky-blue",
+                "color":"https://i.ibb.co/yQgXpCf/skyblue.jpg"
+            }
+        ],
+        "default_price":"220",
+        "custom_price":"250"
+    }
+    , {
+        "category_id":"06",
+        "name":"Hoodie", 
+        "availavle":"100",
+        "Default_image":"https://i.ibb.co/tBP7m6W/white-hodei.jpg",
+        "colors":[
+            {
+                "color_id":"1",
+                "color_name":"white",
+                "color":"https://i.ibb.co/h2xL013/white.jpg"
+            },
+            {
+                "color_id":"2",
+                "color_name":"gray",
+                "color":"https://i.ibb.co/Ytb5Wvs/grat.jpg"
+            },
+            {
+                "color_id":"3",
+                "color_name":"black",
+                "color":"https://i.ibb.co/vXvcPBk/black.png"
+            },
+            {
+                "color_id":"4",
+                "color_name":"blue",
+                "color":"https://i.ibb.co/CB9XSmC/blue.jpg"
+            },
+            {
+                "color_id":"9",
+                "color_name":"red",
+                "color":"https://i.ibb.co/5kGHbJP/read.jpg"
+            }
+
+        ],
+        "default_price":"280",
+        "custom_price":"300"
     }
 ]

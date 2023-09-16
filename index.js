@@ -28,6 +28,15 @@ async function run() {
       .db("garmentsinformation")
       .collection("project-category");
 
+    const categorydetailscollections = client
+      .db("garmentsinformation")
+      .collection("category-details");
+    const qualitycollections = client
+      .db("garmentsinformation")
+      .collection("quality");
+    const colorproductcollections = client
+      .db("garmentsinformation")
+      .collection("colorproducts");
     app.get("/services", async (req, res) => {
       const query = {};
       const services = await servicescollections.find(query).toArray();
@@ -54,6 +63,29 @@ async function run() {
       const query = {};
       const category = await categorycollections.find(query).toArray();
       res.send(category);
+    });
+    app.get(`/customized-details/:id`, async (req, res) => {
+      const id = req.params.id;
+      const query = { category_id: id };
+      const category = await categorydetailscollections.findOne(query);
+      res.send(category);
+    });
+    app.get("/colorproducts", async (req, res) => {
+      const categoryid = req.query.category_id;
+      const colorid = req.query.colorid;
+      const query = {
+        category_id: categoryid,
+      };
+      const products = await colorproductcollections.find(query).toArray();
+      const colorproduct = products.filter(
+        (product) => product.color_id === colorid
+      );
+      res.send(colorproduct);
+    });
+    app.get("/quality", async (req, res) => {
+      const query = {};
+      const quality = await qualitycollections.find(query).toArray();
+      res.send(quality);
     });
     app.get("/blogs", async (req, res) => {
       const query = {};
