@@ -3,6 +3,7 @@ const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
+const stripe = require("stripe")(process.env.SECRET_KEY);
 const { MongoClient, ObjectId } = require("mongodb");
 app.use(cors());
 app.use(express.json());
@@ -37,6 +38,12 @@ async function run() {
     const colorproductcollections = client
       .db("garmentsinformation")
       .collection("colorproducts");
+    const ordercollection = client
+      .db("garmentsinformation")
+      .collection("order_info");
+    const sizeollection = client
+      .db("garmentsinformation")
+      .collection("dress_size");
     app.get("/services", async (req, res) => {
       const query = {};
       const services = await servicescollections.find(query).toArray();
@@ -86,6 +93,31 @@ async function run() {
       const query = {};
       const quality = await qualitycollections.find(query).toArray();
       res.send(quality);
+    });
+    app.post("/requesed_order", async (req, res) => {
+      const request_info = req.body;
+      const result = await ordercollection.insertOne(request_info);
+      res.send(request_info);
+    });
+    app.get("/dress_size", async (req, res) => {
+      const query = {};
+      const sizes = await sizeollection.find(query).toArray();
+      res.send(sizes);
+    });
+    app.post("/create-payment-intent", async (req, res) => {
+      const productinfo = req.body;
+      const price = productinfo.total_price;
+      console.log(price);
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
     app.get("/blogs", async (req, res) => {
       const query = {};

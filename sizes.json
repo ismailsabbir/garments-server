@@ -1,0 +1,32 @@
+[
+    {
+        "size_id":"01",
+        "name":"S",
+        "body":"36-38",
+        "height":"26-27"
+    },
+    {
+        "size_id":"02",
+        "name":"M",
+        "body":"38-40",
+        "height":"27-28"
+    },
+    {
+        "size_id":"01",
+        "name":"L",
+        "body":"40-42",
+        "height":"28-29"
+    },
+    {
+        "size_id":"01",
+        "name":"XL",
+        "body":"42-44",
+        "height":"29-30"
+    },
+    {
+        "size_id":"01",
+        "name":"XXL",
+        "body":"44-46",
+        "height":"30-31"
+    }
+]
