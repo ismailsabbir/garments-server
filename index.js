@@ -44,6 +44,7 @@ async function run() {
     const sizeollection = client
       .db("garmentsinformation")
       .collection("dress_size");
+    const usercollection = client.db("garmentsinformation").collection("users");
     app.get("/services", async (req, res) => {
       const query = {};
       const services = await servicescollections.find(query).toArray();
@@ -111,13 +112,38 @@ async function run() {
       const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
-        currency: "usd",
+        currency: "bdt",
         payment_method_types: ["card"],
       });
 
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
+    });
+    app.put(`/payment/:id`, async (req, res) => {
+      const id = parseInt(req.params.id);
+      const paymentinfo = req.body;
+      const options = { upsert: true };
+      const filter = { orderid: id };
+      console.log(typeof id);
+      const updateorder = {
+        $set: {
+          order: "paid",
+          transiction_id: paymentinfo.transiction_id,
+        },
+      };
+      const result = await ordercollection.updateOne(
+        filter,
+        updateorder,
+        options
+      );
+
+      res.send(result);
+    });
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usercollection.insertOne(user);
+      res.send(user);
     });
     app.get("/blogs", async (req, res) => {
       const query = {};
