@@ -44,6 +44,13 @@ async function run() {
     const sizeollection = client
       .db("garmentsinformation")
       .collection("dress_size");
+    const shopcategorycollection = client
+      .db("garmentsinformation")
+      .collection("shopcategory");
+    const shopproductcollection = client
+      .db("garmentsinformation")
+      .collection("shopproduct");
+
     const usercollection = client.db("garmentsinformation").collection("users");
     app.get("/services", async (req, res) => {
       const query = {};
@@ -141,9 +148,26 @@ async function run() {
       res.send(result);
     });
     app.post("/users", async (req, res) => {
-      const user = req.body;
-      const result = await usercollection.insertOne(user);
-      res.send(user);
+      const userData = req.body;
+      const emailToCheck = userData.email;
+      const existingUser = await usercollection.findOne({
+        email: emailToCheck,
+      });
+      if (existingUser) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
+      await usercollection.insertOne(userData);
+      res.status(201).json({ message: "User created successfully" });
+    });
+    app.get("/shopcategory", async (req, res) => {
+      const query = {};
+      const shopcategory = await shopcategorycollection.find(query).toArray();
+      res.send(shopcategory);
+    });
+    app.get("/shopproduct", async (req, res) => {
+      const query = {};
+      const shopproduct = await shopproductcollection.find(query).toArray();
+      res.send(shopproduct);
     });
     app.get("/blogs", async (req, res) => {
       const query = {};

@@ -1,0 +1,47 @@
+[
+    {
+        "category_id":"01",
+        "category_name":"Shari",
+        "category_image":"https://i.ibb.co/KwgX1GR/shari.jpg"
+    },
+    {
+        "category_id":"02",
+        "category_name":"Salwar Kameez",
+        "category_image":"https://i.ibb.co/2ZN4935/cate-kameez.jpg"
+    },
+    {
+        "category_id":"03",
+        "category_name":"Ladies Tops",
+        "category_image":"https://i.ibb.co/sws7vH1/top1.jpg"
+    },
+    {
+        "category_id":"04",
+        "category_name":"Shawl",
+        "category_image":"https://i.ibb.co/717LgjX/shawal.jpg"
+    },
+    {
+        "category_id":"05",
+        "category_name":"Fatua",
+        "category_image":"https://i.ibb.co/1vFJK62/fatua.jpg"
+    },
+    {
+        "category_id":"06",
+        "category_name":"Panjabi",
+        "category_image":"https://i.ibb.co/0t4mzn9/panjabi1.jpg"
+    },
+    {
+        "category_id":"07",
+        "category_name":"T-shirt",
+        "category_image":"https://i.ibb.co/sPKqTxj/t-shirt.jpg"
+    },
+    {
+        "category_id":"08",
+        "category_name":"Shirt",
+        "category_image":"https://i.ibb.co/S595w1q/shirt3-3.jpg"
+    },
+    {
+        "category_id":"09",
+        "category_name":"Hoodie",
+        "category_image":"https://i.ibb.co/W2W5Ph0/custom1.jpg"
+    }
+]
