@@ -50,8 +50,15 @@ async function run() {
     const shopproductcollection = client
       .db("garmentsinformation")
       .collection("shopproduct");
+    const shopordercollection = client
+      .db("garmentsinformation")
+      .collection("shoporder");
+    const cartproductcollection = client
+      .db("garmentsinformation")
+      .collection("cartproduct");
 
     const usercollection = client.db("garmentsinformation").collection("users");
+
     app.get("/services", async (req, res) => {
       const query = {};
       const services = await servicescollections.find(query).toArray();
@@ -107,10 +114,31 @@ async function run() {
       const result = await ordercollection.insertOne(request_info);
       res.send(request_info);
     });
+    app.post("/shoporder", async (req, res) => {
+      const request_info = req.body;
+      const result = await shopordercollection.insertOne(request_info);
+      res.send(request_info);
+    });
     app.get("/dress_size", async (req, res) => {
       const query = {};
       const sizes = await sizeollection.find(query).toArray();
       res.send(sizes);
+    });
+    app.post("/cartproduct", async (req, res) => {
+      const request_info = req.body;
+      const result = await cartproductcollection.insertOne(request_info);
+      res.send(request_info);
+      console.log(result);
+    });
+    app.get("/cartproduct", async (req, res) => {
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await cartproductcollection.find(Query).toArray();
+      res.send(product);
     });
     app.post("/create-payment-intent", async (req, res) => {
       const productinfo = req.body;
@@ -140,6 +168,27 @@ async function run() {
         },
       };
       const result = await ordercollection.updateOne(
+        filter,
+        updateorder,
+        options
+      );
+
+      res.send(result);
+    });
+
+    app.put(`/shoppayment/:id`, async (req, res) => {
+      const id = parseInt(req.params.id);
+      const paymentinfo = req.body;
+      const options = { upsert: true };
+      const filter = { orderid: id };
+      console.log(id);
+      const updateorder = {
+        $set: {
+          order: "paid",
+          transiction_id: paymentinfo.transiction_id,
+        },
+      };
+      const result = await shopordercollection.updateOne(
         filter,
         updateorder,
         options
