@@ -47,15 +47,22 @@ async function run() {
     const shopcategorycollection = client
       .db("garmentsinformation")
       .collection("shopcategory");
+    // const shopproductcollection = client
+    //   .db("garmentsinformation")
+    //   .collection("shopproduct");
     const shopproductcollection = client
       .db("garmentsinformation")
-      .collection("shopproduct");
+      .collection("products");
+
     const shopordercollection = client
       .db("garmentsinformation")
       .collection("shoporder");
     const cartproductcollection = client
       .db("garmentsinformation")
       .collection("cartproduct");
+    const wishlistproductcollection = client
+      .db("garmentsinformation")
+      .collection("wishlistproduct");
 
     const usercollection = client.db("garmentsinformation").collection("users");
 
@@ -128,7 +135,6 @@ async function run() {
       const request_info = req.body;
       const result = await cartproductcollection.insertOne(request_info);
       res.send(request_info);
-      console.log(result);
     });
     app.get("/cartproduct", async (req, res) => {
       let Query = {};
@@ -138,6 +144,22 @@ async function run() {
         };
       }
       const product = await cartproductcollection.find(Query).toArray();
+      res.send(product);
+    });
+    app.post("/wishlistproduct", async (req, res) => {
+      const request_info = req.body;
+      const result = await wishlistproductcollection.insertOne(request_info);
+      res.send(request_info);
+    });
+    app.get("/wishlistproduct", async (req, res) => {
+      console.log(req.query.email);
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await wishlistproductcollection.find(Query).toArray();
       res.send(product);
     });
     app.post("/create-payment-intent", async (req, res) => {

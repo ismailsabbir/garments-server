@@ -25,7 +25,29 @@
                 "dimention":"11 x 10 x 0.75 inches; 5 Ounces",
                 "department":"mens", 
                 "manifacture":"Seven Times Six",
-                "available_date":" January 17, 2019"
+                "available_date":" January 17, 2019",
+                "dress_size":[
+                    {
+                        "size_id":"1",
+                        "size":"S"
+                    },
+                    {
+                        "size_id":"2",
+                        "size":"M"
+                    },
+                    {
+                        "size_id":"3",
+                        "size":"L"
+                    },
+                    {
+                        "size_id":"4",
+                        "size":"XL"
+                    },
+                    {
+                        "size_id":"5",
+                        "size":"XXL"
+                    }
+                ]
             },
             {
                 "product_id":"02",
