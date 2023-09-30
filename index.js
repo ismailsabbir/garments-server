@@ -149,10 +149,10 @@ async function run() {
     app.post("/wishlistproduct", async (req, res) => {
       const request_info = req.body;
       const result = await wishlistproductcollection.insertOne(request_info);
+
       res.send(request_info);
     });
     app.get("/wishlistproduct", async (req, res) => {
-      console.log(req.query.email);
       let Query = {};
       if (req.query.email) {
         Query = {
@@ -162,10 +162,23 @@ async function run() {
       const product = await wishlistproductcollection.find(Query).toArray();
       res.send(product);
     });
+    app.delete(`/wishlistproduct/:id`, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await wishlistproductcollection.deleteOne(query);
+
+      res.send(result);
+    });
+    app.delete(`/cartproduct/:id`, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartproductcollection.deleteOne(query);
+
+      res.send(result);
+    });
     app.post("/create-payment-intent", async (req, res) => {
       const productinfo = req.body;
       const price = productinfo.total_price;
-      console.log(price);
       const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
@@ -182,7 +195,6 @@ async function run() {
       const paymentinfo = req.body;
       const options = { upsert: true };
       const filter = { orderid: id };
-      console.log(typeof id);
       const updateorder = {
         $set: {
           order: "paid",
@@ -203,7 +215,6 @@ async function run() {
       const paymentinfo = req.body;
       const options = { upsert: true };
       const filter = { orderid: id };
-      console.log(id);
       const updateorder = {
         $set: {
           order: "paid",
