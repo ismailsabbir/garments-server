@@ -1,14 +1,32 @@
 const express = require("express");
+var jwt = require("jsonwebtoken");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 const stripe = require("stripe")(process.env.SECRET_KEY);
+
 const { MongoClient, ObjectId } = require("mongodb");
 app.use(cors());
 app.use(express.json());
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@cluster0.3w5podw.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri);
+
+function verifyjwt(req, res, next) {
+  const jwttokens = req.headers.authorization;
+  if (!jwttokens) {
+    return res.status(401).send({ message: "unautorized access" });
+  }
+  const token = jwttokens.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (error, decoded) {
+    if (error) {
+      return res.status(403).send({ message: "forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+
 async function run() {
   await client.connect();
   try {
@@ -63,8 +81,15 @@ async function run() {
     const wishlistproductcollection = client
       .db("garmentsinformation")
       .collection("wishlistproduct");
-
     const usercollection = client.db("garmentsinformation").collection("users");
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+        expiresIn: "1d",
+      });
+      console.log(token);
+      res.send({ token });
+    });
 
     app.get("/services", async (req, res) => {
       const query = {};
@@ -136,7 +161,11 @@ async function run() {
       const result = await cartproductcollection.insertOne(request_info);
       res.send(request_info);
     });
-    app.get("/cartproduct", async (req, res) => {
+    app.get("/cartproduct", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       let Query = {};
       if (req.query.email) {
         Query = {
@@ -149,7 +178,7 @@ async function run() {
     app.post("/wishlistproduct", async (req, res) => {
       const request_info = req.body;
       const result = await wishlistproductcollection.insertOne(request_info);
-
+      console.log(result);
       res.send(request_info);
     });
     app.get("/wishlistproduct", async (req, res) => {
