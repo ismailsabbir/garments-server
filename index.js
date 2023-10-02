@@ -5,13 +5,15 @@ const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 const stripe = require("stripe")(process.env.SECRET_KEY);
-
+const SSLCommerzPayment = require("sslcommerz-lts");
 const { MongoClient, ObjectId } = require("mongodb");
+const store_id = process.env.STORE_ID;
+const store_passwd = process.env.STORE_PASSWORD;
+const is_live = false;
 app.use(cors());
 app.use(express.json());
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@cluster0.3w5podw.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri);
-
 function verifyjwt(req, res, next) {
   const jwttokens = req.headers.authorization;
   if (!jwttokens) {
@@ -87,7 +89,7 @@ async function run() {
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
         expiresIn: "1d",
       });
-      console.log(token);
+      // console.log(token);
       res.send({ token });
     });
 
@@ -151,6 +153,7 @@ async function run() {
       const result = await shopordercollection.insertOne(request_info);
       res.send(request_info);
     });
+
     app.get("/dress_size", async (req, res) => {
       const query = {};
       const sizes = await sizeollection.find(query).toArray();
@@ -237,6 +240,73 @@ async function run() {
       );
 
       res.send(result);
+    });
+    app.post(`/shop_bkash_payment`, async (req, res) => {
+      const confirmdata = req.body;
+      console.log(confirmdata);
+      const transictionid = new ObjectId().toString();
+      const data = {
+        total_amount: confirmdata.total_price,
+        currency: "BDT",
+        tran_id: transictionid,
+        success_url: `${process.env.SERVER_LINK}/payment/sucess?transiction_id=${transictionid}&orderid=${confirmdata.orderid}`,
+        fail_url: `${process.env.SERVER_LINK}/payment/failed`,
+        cancel_url: `${process.env.SERVER_LINK}/payment/cancle`,
+        ipn_url: "http://localhost:3030/ipn",
+        shipping_method: "Courier",
+        product_name: confirmdata.category_name,
+        product_category: confirmdata.category_name,
+        product_profile: "general",
+        cus_name: confirmdata.name,
+        cus_email: confirmdata.email,
+        cus_add1: confirmdata.address,
+        cus_add2: "Dhaka",
+        cus_city: "Dhaka",
+        cus_state: "Dhaka",
+        cus_postcode: confirmdata.postcode,
+        cus_country: "Bangladesh",
+        cus_phone: confirmdata.phone,
+        cus_fax: "01711111111",
+        ship_name: "Customer Name",
+        ship_add1: "Dhaka",
+        ship_add2: "Dhaka",
+        ship_city: "Dhaka",
+        ship_state: "Dhaka",
+        ship_postcode: 1000,
+        ship_country: "Bangladesh",
+      };
+      console.log(data);
+      const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+      sslcz.init(data).then((apiResponse) => {
+        let GatewayPageURL = apiResponse.GatewayPageURL;
+        res.send({ url: GatewayPageURL });
+      });
+    });
+
+    app.post("/payment/sucess", async (req, res) => {
+      const transiction_id = req.query.transiction_id;
+      const orderid = parseInt(req.query.orderid);
+      const paydate = new Date();
+      const result = await ordercollection.updateOne(
+        { orderid },
+        {
+          $set: {
+            order: "paid",
+            transiction_id: transiction_id,
+            paidAt: paydate,
+          },
+        }
+      );
+      if (result.modifiedCount > 0) {
+        res.redirect(
+          `${process.env.CLIENT_LINK}/payment/sucess/?transiction_id=${transiction_id}`
+        );
+      }
+    });
+    app.get("/order/by_transcation_id/:id", async (req, res) => {
+      const { id } = req.params;
+      const order = await ordercollection.findOne({ transiction_id: id });
+      res.send(order);
     });
 
     app.put(`/shoppayment/:id`, async (req, res) => {
