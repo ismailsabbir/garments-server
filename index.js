@@ -178,6 +178,20 @@ async function run() {
       const product = await cartproductcollection.find(Query).toArray();
       res.send(product);
     });
+    app.get("/customized_orders", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await ordercollection.find(Query).toArray();
+      res.send(product);
+    });
     app.post("/wishlistproduct", async (req, res) => {
       const request_info = req.body;
       const result = await wishlistproductcollection.insertOne(request_info);
@@ -245,12 +259,18 @@ async function run() {
       const confirmdata = req.body;
       console.log(confirmdata);
       const transictionid = new ObjectId().toString();
+      const { name, email, address } = confirmdata;
+      if (!email || !name || !address) {
+        return res.send({
+          error: "Please Provide information",
+        });
+      }
       const data = {
         total_amount: confirmdata.total_price,
         currency: "BDT",
         tran_id: transictionid,
         success_url: `${process.env.SERVER_LINK}/payment/sucess?transiction_id=${transictionid}&orderid=${confirmdata.orderid}`,
-        fail_url: `${process.env.SERVER_LINK}/payment/failed`,
+        fail_url: `${process.env.SERVER_LINK}/payment/failed?transiction_id=${transictionid}&orderid=${confirmdata.orderid}`,
         cancel_url: `${process.env.SERVER_LINK}/payment/cancle`,
         ipn_url: "http://localhost:3030/ipn",
         shipping_method: "Courier",
@@ -286,6 +306,11 @@ async function run() {
     app.post("/payment/sucess", async (req, res) => {
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
+      if (!transiction_id || !orderid) {
+        return res.redirect(
+          `${process.env.CLIENT_LINK}/payment/failed?orderid=${orderid}`
+        );
+      }
       const paydate = new Date();
       const result = await ordercollection.updateOne(
         { orderid },
@@ -303,9 +328,124 @@ async function run() {
         );
       }
     });
+    app.post("/payment/failed", async (req, res) => {
+      const transiction_id = req.query.transiction_id;
+      const orderid = parseInt(req.query.orderid);
+
+      res.redirect(
+        `${process.env.CLIENT_LINK}/payment/failed?orderid=${orderid}`
+      );
+    });
+
+    app.post(`/product_bkash_payment`, async (req, res) => {
+      const confirmdata = req.body;
+      console.log(confirmdata);
+      const transictionid = new ObjectId().toString();
+      const { name, email, address } = confirmdata;
+      if (!email || !name || !address) {
+        return res.send({
+          error: "Please Provide information",
+        });
+      }
+      const data = {
+        total_amount: confirmdata.total_price,
+        currency: "BDT",
+        tran_id: transictionid,
+        success_url: `${process.env.SERVER_LINK}/product/payment/sucess?transiction_id=${transictionid}&orderid=${confirmdata.orderid}`,
+        fail_url: `${process.env.SERVER_LINK}/product/payment/failed?transiction_id=${transictionid}&orderid=${confirmdata.orderid}`,
+        cancel_url: `${process.env.SERVER_LINK}/payment/cancle`,
+        ipn_url: "http://localhost:3030/ipn",
+        shipping_method: "Courier",
+        product_name: confirmdata.category_name,
+        product_category: confirmdata.category_name,
+        product_profile: "general",
+        cus_name: confirmdata.name,
+        cus_email: confirmdata.email,
+        cus_add1: confirmdata.address,
+        cus_add2: "Dhaka",
+        cus_city: "Dhaka",
+        cus_state: "Dhaka",
+        cus_postcode: confirmdata.postcode,
+        cus_country: "Bangladesh",
+        cus_phone: confirmdata.phone,
+        cus_fax: "01711111111",
+        ship_name: "Customer Name",
+        ship_add1: "Dhaka",
+        ship_add2: "Dhaka",
+        ship_city: "Dhaka",
+        ship_state: "Dhaka",
+        ship_postcode: 1000,
+        ship_country: "Bangladesh",
+      };
+      console.log(data);
+      const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+      sslcz.init(data).then((apiResponse) => {
+        let GatewayPageURL = apiResponse.GatewayPageURL;
+        res.send({ url: GatewayPageURL });
+      });
+    });
+
+    app.post("/product/payment/sucess", async (req, res) => {
+      const transiction_id = req.query.transiction_id;
+      const orderid = parseInt(req.query.orderid);
+      if (!transiction_id || !orderid) {
+        return res.redirect(
+          `${process.env.CLIENT_LINK}/product/payment/failed?orderid=${orderid}`
+        );
+      }
+      const paydate = new Date();
+      const result = await shopordercollection.updateOne(
+        { orderid },
+        {
+          $set: {
+            order: "paid",
+            transiction_id: transiction_id,
+            paidAt: paydate,
+          },
+        }
+      );
+      if (result.modifiedCount > 0) {
+        res.redirect(
+          `${process.env.CLIENT_LINK}/product/payment/sucess/?transiction_id=${transiction_id}`
+        );
+      }
+    });
+    app.post("/product/payment/failed", async (req, res) => {
+      const transiction_id = req.query.transiction_id;
+      const orderid = parseInt(req.query.orderid);
+
+      res.redirect(
+        `${process.env.CLIENT_LINK}/product/payment/failed?orderid=${orderid}`
+      );
+    });
+
     app.get("/order/by_transcation_id/:id", async (req, res) => {
       const { id } = req.params;
       const order = await ordercollection.findOne({ transiction_id: id });
+      res.send(order);
+    });
+    app.get("/product/order/by_transcation_id/:id", async (req, res) => {
+      const { id } = req.params;
+      const order = await shopordercollection.findOne({ transiction_id: id });
+      res.send(order);
+    });
+    app.get("/shoporder/by_transcation_id/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const order = await shopordercollection.findOne({ transiction_id: id });
+      res.send(order);
+    });
+    app.get("/order/by_order_id/:id", async (req, res) => {
+      const { id } = req.params;
+      const orderid = parseInt(id);
+      const order = await ordercollection.findOne({ orderid: orderid });
+      res.send(order);
+    });
+    app.get("/product/order/by_order_id/:id", async (req, res) => {
+      const { id } = req.params;
+      const orderid = parseInt(id);
+      console.log(orderid);
+      const order = await shopordercollection.findOne({ orderid: orderid });
       res.send(order);
     });
 
