@@ -222,6 +222,11 @@ async function run() {
 
       res.send(result);
     });
+    app.delete("/allcartproduct", async (req, res) => {
+      const query = {};
+      const result = await cartproductcollection.deleteOne(query);
+      res.send(result);
+    });
     app.post("/create-payment-intent", async (req, res) => {
       const productinfo = req.body;
       const price = productinfo.total_price;
