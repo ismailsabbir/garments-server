@@ -77,6 +77,10 @@ async function run() {
     const shopordercollection = client
       .db("garmentsinformation")
       .collection("shoporder");
+    const cartordercollection = client
+      .db("garmentsinformation")
+      .collection("cartorder");
+
     const cartproductcollection = client
       .db("garmentsinformation")
       .collection("cartproduct");
@@ -153,7 +157,11 @@ async function run() {
       const result = await shopordercollection.insertOne(request_info);
       res.send(request_info);
     });
-
+    app.post("/cartorder", async (req, res) => {
+      const request_info = req.body;
+      const result = await cartordercollection.insertOne(request_info);
+      res.send(request_info);
+    });
     app.get("/dress_size", async (req, res) => {
       const query = {};
       const sizes = await sizeollection.find(query).toArray();
@@ -224,7 +232,7 @@ async function run() {
     });
     app.delete("/allcartproduct", async (req, res) => {
       const query = {};
-      const result = await cartproductcollection.deleteOne(query);
+      const result = await cartproductcollection.deleteMany(query);
       res.send(result);
     });
     app.post("/create-payment-intent", async (req, res) => {
@@ -307,7 +315,87 @@ async function run() {
         res.send({ url: GatewayPageURL });
       });
     });
+    app.post(`/cart_bkash_payment`, async (req, res) => {
+      const confirmdata = req.body;
+      console.log(confirmdata);
+      const transictionid = new ObjectId().toString();
+      const { name, email, address } = confirmdata;
+      if (!email || !name || !address) {
+        return res.send({
+          error: "Please Provide information",
+        });
+      }
+      const data = {
+        total_amount: confirmdata.total_price,
+        currency: "BDT",
+        tran_id: transictionid,
+        success_url: `${process.env.SERVER_LINK}/cart/payment/sucess?transiction_id=${transictionid}&orderid=${confirmdata.orderid}`,
+        fail_url: `${process.env.SERVER_LINK}/cart/payment/failed?transiction_id=${transictionid}&orderid=${confirmdata.orderid}`,
+        cancel_url: `${process.env.SERVER_LINK}/payment/cancle`,
+        ipn_url: "http://localhost:3030/ipn",
+        shipping_method: "Courier",
+        product_name: "confirmdata.category_name",
+        product_category: "confirmdata.category_name",
+        product_profile: "general",
+        cus_name: confirmdata.name,
+        cus_email: confirmdata.email,
+        cus_add1: confirmdata.address,
+        cus_add2: "Dhaka",
+        cus_city: "Dhaka",
+        cus_state: "Dhaka",
+        cus_postcode: confirmdata.postcode,
+        cus_country: "Bangladesh",
+        cus_phone: confirmdata.phone,
+        cus_fax: "01711111111",
+        ship_name: "Customer Name",
+        ship_add1: "Dhaka",
+        ship_add2: "Dhaka",
+        ship_city: "Dhaka",
+        ship_state: "Dhaka",
+        ship_postcode: 1000,
+        ship_country: "Bangladesh",
+      };
+      console.log(data);
+      const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+      sslcz.init(data).then((apiResponse) => {
+        let GatewayPageURL = apiResponse.GatewayPageURL;
+        res.send({ url: GatewayPageURL });
+      });
+    });
+    app.post("/cart/payment/sucess", async (req, res) => {
+      const transiction_id = req.query.transiction_id;
+      const orderid = parseInt(req.query.orderid);
+      console.log(transiction_id);
+      if (!transiction_id || !orderid) {
+        return res.redirect(
+          `${process.env.CLIENT_LINK}/cart/payment/failed?orderid=${orderid}`
+        );
+      }
+      const paydate = new Date();
+      const result = await cartordercollection.updateOne(
+        { orderid },
+        {
+          $set: {
+            order: "paid",
+            transiction_id: transiction_id,
+            paidAt: paydate,
+          },
+        }
+      );
+      if (result.modifiedCount > 0) {
+        res.redirect(
+          `${process.env.CLIENT_LINK}/cart_payment_sucess/?transiction_id=${transiction_id}`
+        );
+      }
+    });
+    app.post("/cart/payment/failed", async (req, res) => {
+      const transiction_id = req.query.transiction_id;
+      const orderid = parseInt(req.query.orderid);
 
+      res.redirect(
+        `${process.env.CLIENT_LINK}/cart/payment/failed?orderid=${orderid}`
+      );
+    });
     app.post("/payment/sucess", async (req, res) => {
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
@@ -440,6 +528,12 @@ async function run() {
       const order = await shopordercollection.findOne({ transiction_id: id });
       res.send(order);
     });
+    app.get("/cartorder/by_transcation_id/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const order = await cartordercollection.findOne({ transiction_id: id });
+      res.send(order);
+    });
     app.get("/order/by_order_id/:id", async (req, res) => {
       const { id } = req.params;
       const orderid = parseInt(id);
@@ -451,6 +545,13 @@ async function run() {
       const orderid = parseInt(id);
       console.log(orderid);
       const order = await shopordercollection.findOne({ orderid: orderid });
+      res.send(order);
+    });
+    app.get("/cart/order/by_order_id/:id", async (req, res) => {
+      const { id } = req.params;
+      const orderid = parseInt(id);
+      console.log(orderid);
+      const order = await cartordercollection.findOne({ orderid: orderid });
       res.send(order);
     });
 
@@ -466,6 +567,25 @@ async function run() {
         },
       };
       const result = await shopordercollection.updateOne(
+        filter,
+        updateorder,
+        options
+      );
+
+      res.send(result);
+    });
+    app.put(`/cartpayment/:id`, async (req, res) => {
+      const id = parseInt(req.params.id);
+      const paymentinfo = req.body;
+      const options = { upsert: true };
+      const filter = { orderid: id };
+      const updateorder = {
+        $set: {
+          order: "paid",
+          transiction_id: paymentinfo.transiction_id,
+        },
+      };
+      const result = await cartordercollection.updateOne(
         filter,
         updateorder,
         options
