@@ -87,13 +87,16 @@ async function run() {
     const wishlistproductcollection = client
       .db("garmentsinformation")
       .collection("wishlistproduct");
+    const addresscollection = client
+      .db("garmentsinformation")
+      .collection("address");
     const usercollection = client.db("garmentsinformation").collection("users");
+
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
         expiresIn: "1d",
       });
-      // console.log(token);
       res.send({ token });
     });
 
@@ -625,7 +628,137 @@ async function run() {
       const members = await membercollections.find(query).toArray();
       res.send(members);
     });
+    app.get("/shoporder", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await shopordercollection.find(Query).limit(1).toArray();
+      res.send(product);
+    });
+    app.get("/cart-s-order", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await cartordercollection.find(Query).limit(1).toArray();
+      res.send(product);
+    });
+    app.get("/customize-s-order", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await ordercollection.find(Query).limit(1).toArray();
+      res.send(product);
+    });
+    app.get("/shoporders", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await shopordercollection.find(Query).toArray();
+      res.send(product);
+    });
+    app.get("/user", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await usercollection.findOne(Query);
+      res.send(product);
+    });
+    app.put("/userupdate", async (req, res) => {
+      const email = req.query.email;
+      const filter = {
+        email: email,
+      };
+      const user = req.body;
+      const option = { upsert: true };
+      const updateuser = {
+        $set: {
+          name: user.name,
+          mobile: user.mobile,
+          birth: user.birth,
+          gender: user.gender,
+        },
+      };
+      const result = await usercollection.updateOne(filter, updateuser, option);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/address", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      const email = req.query.email;
+      const request_info = req.body;
+      const oneaddress = await addresscollection.findOne({ email: email });
+      if (email === decoded.email && oneaddress?.email === email) {
+        const result = await addresscollection.updateOne(
+          { email },
+          {
+            $set: {
+              email: request_info.email,
+              name: request_info.name,
+              address: request_info.address,
+              phone: request_info.phone,
+              landmark: request_info.landmark,
+              province: request_info.province,
+              city: request_info.city,
+              location: request_info.location,
+              area: request_info.area,
+            },
+          }
+        );
+      } else {
+        const result = await addresscollection.insertOne(request_info);
+      }
 
+      res.send(request_info);
+    });
+    app.get("/address", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      const product = await addresscollection.find(Query).limit(1).toArray();
+      res.send(product);
+    });
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
     });
