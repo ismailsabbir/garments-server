@@ -67,9 +67,6 @@ async function run() {
     const shopcategorycollection = client
       .db("garmentsinformation")
       .collection("shopcategory");
-    // const shopproductcollection = client
-    //   .db("garmentsinformation")
-    //   .collection("shopproduct");
     const shopproductcollection = client
       .db("garmentsinformation")
       .collection("products");
@@ -99,7 +96,6 @@ async function run() {
       });
       res.send({ token });
     });
-
     app.get("/services", async (req, res) => {
       const query = {};
       const services = await servicescollections.find(query).toArray();
@@ -189,6 +185,53 @@ async function run() {
       const product = await cartproductcollection.find(Query).toArray();
       res.send(product);
     });
+    app.get("/mycartproduct", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      let product = await cartproductcollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      let count = await cartproductcollection.estimatedDocumentCount();
+      res.send({ count, product });
+    });
+    app.get("/mywishproduct", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      let product = await wishlistproductcollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      let count = await wishlistproductcollection.estimatedDocumentCount();
+
+      res.send({ count, product });
+    });
     app.get("/customized_orders", verifyjwt, async (req, res) => {
       const decoded = req.decoded;
       if (decoded.email !== req.query.email) {
@@ -206,7 +249,6 @@ async function run() {
     app.post("/wishlistproduct", async (req, res) => {
       const request_info = req.body;
       const result = await wishlistproductcollection.insertOne(request_info);
-      console.log(result);
       res.send(request_info);
     });
     app.get("/wishlistproduct", async (req, res) => {
@@ -273,7 +315,7 @@ async function run() {
     });
     app.post(`/shop_bkash_payment`, async (req, res) => {
       const confirmdata = req.body;
-      console.log(confirmdata);
+
       const transictionid = new ObjectId().toString();
       const { name, email, address } = confirmdata;
       if (!email || !name || !address) {
@@ -320,7 +362,7 @@ async function run() {
     });
     app.post(`/cart_bkash_payment`, async (req, res) => {
       const confirmdata = req.body;
-      console.log(confirmdata);
+
       const transictionid = new ObjectId().toString();
       const { name, email, address } = confirmdata;
       if (!email || !name || !address) {
@@ -368,14 +410,14 @@ async function run() {
     app.post("/cart/payment/sucess", async (req, res) => {
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
-      console.log(transiction_id);
+
       if (!transiction_id || !orderid) {
         return res.redirect(
           `${process.env.CLIENT_LINK}/cart/payment/failed?orderid=${orderid}`
         );
       }
       const paydate = new Date();
-      const result = await cartordercollection.updateOne(
+      const result = await shopordercollection.updateOne(
         { orderid },
         {
           $set: {
@@ -432,10 +474,8 @@ async function run() {
         `${process.env.CLIENT_LINK}/payment/failed?orderid=${orderid}`
       );
     });
-
     app.post(`/product_bkash_payment`, async (req, res) => {
       const confirmdata = req.body;
-      console.log(confirmdata);
       const transictionid = new ObjectId().toString();
       const { name, email, address } = confirmdata;
       if (!email || !name || !address) {
@@ -480,7 +520,6 @@ async function run() {
         res.send({ url: GatewayPageURL });
       });
     });
-
     app.post("/product/payment/sucess", async (req, res) => {
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
@@ -514,7 +553,6 @@ async function run() {
         `${process.env.CLIENT_LINK}/product/payment/failed?orderid=${orderid}`
       );
     });
-
     app.get("/order/by_transcation_id/:id", async (req, res) => {
       const { id } = req.params;
       const order = await ordercollection.findOne({ transiction_id: id });
@@ -527,13 +565,12 @@ async function run() {
     });
     app.get("/shoporder/by_transcation_id/:id", async (req, res) => {
       const { id } = req.params;
-      console.log(id);
+
       const order = await shopordercollection.findOne({ transiction_id: id });
       res.send(order);
     });
     app.get("/cartorder/by_transcation_id/:id", async (req, res) => {
       const { id } = req.params;
-      console.log(id);
       const order = await cartordercollection.findOne({ transiction_id: id });
       res.send(order);
     });
@@ -546,18 +583,15 @@ async function run() {
     app.get("/product/order/by_order_id/:id", async (req, res) => {
       const { id } = req.params;
       const orderid = parseInt(id);
-      console.log(orderid);
       const order = await shopordercollection.findOne({ orderid: orderid });
       res.send(order);
     });
     app.get("/cart/order/by_order_id/:id", async (req, res) => {
       const { id } = req.params;
       const orderid = parseInt(id);
-      console.log(orderid);
       const order = await cartordercollection.findOne({ orderid: orderid });
       res.send(order);
     });
-
     app.put(`/shoppayment/:id`, async (req, res) => {
       const id = parseInt(req.params.id);
       const paymentinfo = req.body;
@@ -588,7 +622,7 @@ async function run() {
           transiction_id: paymentinfo.transiction_id,
         },
       };
-      const result = await cartordercollection.updateOne(
+      const result = await shopordercollection.updateOne(
         filter,
         updateorder,
         options
@@ -671,18 +705,112 @@ async function run() {
       res.send(product);
     });
     app.get("/shoporders", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
       const decoded = req.decoded;
       if (decoded.email !== req.query.email) {
         return res.status(403).send({ message: "forbidden access" });
       }
+
       let Query = {};
       if (req.query.email) {
         Query = {
           email: req.query.email,
         };
       }
-      const product = await shopordercollection.find(Query).toArray();
-      res.send(product);
+      let product = await shopordercollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      let count = await shopordercollection.estimatedDocumentCount();
+      if (search) {
+        const idproduct = product.find((order) => order?.orderid === search);
+        product = [idproduct];
+        count = product.length;
+      }
+
+      res.send({ count, product });
+    });
+    app.get("/customizedorders", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      let product = await ordercollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      let count = await ordercollection.estimatedDocumentCount();
+      if (search) {
+        const idproduct = product.find((order) => order?.orderid === search);
+        product = [idproduct];
+        count = product.length;
+      }
+
+      res.send({ count, product });
+    });
+    app.get("/idodrders", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      let product = await shopordercollection.find(Query).toArray();
+      let count = await shopordercollection.estimatedDocumentCount();
+      if (search) {
+        const idproduct = product.find((order) => order?.orderid === search);
+        product = [idproduct];
+        count = product.length;
+      }
+
+      res.send({ count, product });
+    });
+    app.get("/idcustomizedodrders", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      let product = await ordercollection.find(Query).toArray();
+      let count = await ordercollection.estimatedDocumentCount();
+      if (search) {
+        const idproduct = product.find((order) => order?.orderid === search);
+        product = [idproduct];
+        count = product.length;
+      }
+
+      res.send({ count, product });
     });
     app.get("/user", verifyjwt, async (req, res) => {
       const decoded = req.decoded;
@@ -714,7 +842,6 @@ async function run() {
         },
       };
       const result = await usercollection.updateOne(filter, updateuser, option);
-      console.log(result);
       res.send(result);
     });
     app.post("/address", verifyjwt, async (req, res) => {
