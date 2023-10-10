@@ -1,9 +1,12 @@
 const express = require("express");
+
 var jwt = require("jsonwebtoken");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
+const nodemailer = require("nodemailer");
+// const image = require("./Images/Logo.png");
 const stripe = require("stripe")(process.env.SECRET_KEY);
 const SSLCommerzPayment = require("sslcommerz-lts");
 const { MongoClient, ObjectId } = require("mongodb");
@@ -12,8 +15,10 @@ const store_passwd = process.env.STORE_PASSWORD;
 const is_live = false;
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@cluster0.3w5podw.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri);
+
 function verifyjwt(req, res, next) {
   const jwttokens = req.headers.authorization;
   if (!jwttokens) {
@@ -28,6 +33,96 @@ function verifyjwt(req, res, next) {
     next();
   });
 }
+
+const sendemail = (emaildata, emeil) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS,
+    },
+  });
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: emeil,
+    subject: emaildata?.subject,
+    html: `
+    <html>
+    <head>
+      <title>Order Confirmation</title>
+      <link rel="stylesheet" type="text/css" href="/design.css">
+    </head>
+    <body>
+      <div style="background-color: #F4F7F8; padding: 10px; text-align: center; font-size: 15px;">
+        <p style="color: blue; font-size: 1.1rem; font-weight: 500;">Order id# ${emaildata?.message.orderid}</p>
+        <h5>Your Order is Confirmed</h5>
+        <p>Date Ordered:${emaildata.message.order_date}</p>
+        <p>Shipping Address</p>
+        <p>${emaildata?.message?.name}</p>
+        <p>Adress #.${emaildata?.message?.address},${emaildata?.message?.postcode}</p>
+        <p>Mob: ${emaildata?.message.phone}</p>
+        <p>Email: ${emaildata?.message.email}</p>
+      </div>
+    </body>
+  </html>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+      // do something useful
+    }
+  });
+};
+
+const sendsucessemail = (emaildata, emeil) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS,
+    },
+  });
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: emeil,
+    subject: emaildata?.subject,
+    html: `
+    <html>
+    <head>
+      <title>Order Confirmation</title>
+      <link rel="stylesheet" type="text/css" href="/design.css">
+    </head>
+    <body>
+      <div style="background-color: #F4F7F8; padding: 10px; text-align: center; font-size: 15px;">
+        <p style="color: blue; font-size: 1.1rem; font-weight: 500;">Order id# ${emaildata?.message.orderid}</p>
+        <h5>Your Order is Confirmed</h5>
+        <p>Date Ordered:${emaildata.message.order_date}</p>
+        <p>Order: ${emaildata?.message.order}</p>
+        <p>Transaction id: ${emaildata.message.transiction_id}</p>
+        <p>Shipping Address</p>
+        <p>${emaildata?.message?.name}</p>
+        <p>Adress #.${emaildata?.message?.address},${emaildata?.message?.postcode}</p>
+        <p>Mob: ${emaildata?.message.phone}</p>
+        <p>Email: ${emaildata?.message.email}</p>
+      </div>
+    </body>
+  </html>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+      // do something useful
+    }
+  });
+};
 
 async function run() {
   await client.connect();
@@ -148,17 +243,38 @@ async function run() {
     });
     app.post("/requesed_order", async (req, res) => {
       const request_info = req.body;
+      sendemail(
+        {
+          subject: `Order Confirm`,
+          message: request_info,
+        },
+        request_info?.email
+      );
       const result = await ordercollection.insertOne(request_info);
       res.send(request_info);
     });
     app.post("/shoporder", async (req, res) => {
       const request_info = req.body;
       const result = await shopordercollection.insertOne(request_info);
+      sendemail(
+        {
+          subject: `Order Confirm`,
+          message: request_info,
+        },
+        request_info?.email
+      );
       res.send(request_info);
     });
     app.post("/cartorder", async (req, res) => {
       const request_info = req.body;
       const result = await cartordercollection.insertOne(request_info);
+      sendemail(
+        {
+          subject: `Order Confirm`,
+          message: request_info,
+        },
+        request_info?.email
+      );
       res.send(request_info);
     });
     app.get("/dress_size", async (req, res) => {
@@ -243,6 +359,13 @@ async function run() {
           email: req.query.email,
         };
       }
+      sendemail(
+        {
+          subject: `Order Confirm`,
+          message: request_info,
+        },
+        request_info?.email
+      );
       const product = await ordercollection.find(Query).toArray();
       res.send(product);
     });
@@ -310,12 +433,20 @@ async function run() {
         updateorder,
         options
       );
-
+      const orderdata = await ordercollection.findOne({
+        transiction_id: paymentinfo.transiction_id,
+      });
+      sendsucessemail(
+        {
+          subject: `Order & Payment Sucessfully !!!`,
+          message: orderdata,
+        },
+        orderdata?.email
+      );
       res.send(result);
     });
     app.post(`/shop_bkash_payment`, async (req, res) => {
       const confirmdata = req.body;
-
       const transictionid = new ObjectId().toString();
       const { name, email, address } = confirmdata;
       if (!email || !name || !address) {
@@ -428,6 +559,17 @@ async function run() {
         }
       );
       if (result.modifiedCount > 0) {
+        const orderdata = await shopordercollection.findOne({
+          transiction_id: transiction_id,
+        });
+        sendsucessemail(
+          {
+            subject: `Order & Payment Sucessfully !!!`,
+            message: orderdata,
+          },
+          orderdata?.email
+        );
+
         res.redirect(
           `${process.env.CLIENT_LINK}/cart_payment_sucess/?transiction_id=${transiction_id}`
         );
@@ -441,6 +583,7 @@ async function run() {
         `${process.env.CLIENT_LINK}/cart/payment/failed?orderid=${orderid}`
       );
     });
+
     app.post("/payment/sucess", async (req, res) => {
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
@@ -461,6 +604,16 @@ async function run() {
         }
       );
       if (result.modifiedCount > 0) {
+        const orderdata = await ordercollection.findOne({
+          transiction_id: transiction_id,
+        });
+        sendsucessemail(
+          {
+            subject: `Order & Payment Sucessfully !!!`,
+            message: orderdata,
+          },
+          orderdata?.email
+        );
         res.redirect(
           `${process.env.CLIENT_LINK}/payment/sucess/?transiction_id=${transiction_id}`
         );
@@ -540,6 +693,18 @@ async function run() {
         }
       );
       if (result.modifiedCount > 0) {
+        const orderdata = await shopordercollection.findOne({
+          transiction_id: transiction_id,
+        });
+        console.log(orderdata);
+        sendsucessemail(
+          {
+            subject: `Order & Payment Sucessfully !!!`,
+            message: orderdata,
+          },
+          orderdata?.email
+        );
+
         res.redirect(
           `${process.env.CLIENT_LINK}/product/payment/sucess/?transiction_id=${transiction_id}`
         );
@@ -595,6 +760,7 @@ async function run() {
     app.put(`/shoppayment/:id`, async (req, res) => {
       const id = parseInt(req.params.id);
       const paymentinfo = req.body;
+
       const options = { upsert: true };
       const filter = { orderid: id };
       const updateorder = {
@@ -603,10 +769,22 @@ async function run() {
           transiction_id: paymentinfo.transiction_id,
         },
       };
+
       const result = await shopordercollection.updateOne(
         filter,
         updateorder,
         options
+      );
+      const orderdata = await shopordercollection.findOne({
+        transiction_id: paymentinfo.transiction_id,
+      });
+      console.log(orderdata);
+      sendsucessemail(
+        {
+          subject: `Order & Payment Sucessfully !!!`,
+          message: orderdata,
+        },
+        orderdata?.email
       );
 
       res.send(result);
@@ -626,6 +804,16 @@ async function run() {
         filter,
         updateorder,
         options
+      );
+      const orderdata = await shopordercollection.findOne({
+        transiction_id: paymentinfo.transiction_id,
+      });
+      sendsucessemail(
+        {
+          subject: `Order & Payment Sucessfully !!!`,
+          message: orderdata,
+        },
+        orderdata?.email
       );
 
       res.send(result);
