@@ -1,5 +1,5 @@
 const express = require("express");
-
+// const natural = require("natural");
 var jwt = require("jsonwebtoken");
 const cors = require("cors");
 const app = express();
@@ -9,7 +9,7 @@ const nodemailer = require("nodemailer");
 // const image = require("./Images/Logo.png");
 const stripe = require("stripe")(process.env.SECRET_KEY);
 const SSLCommerzPayment = require("sslcommerz-lts");
-const { MongoClient, ObjectId } = require("mongodb");
+const { MongoClient, ObjectId, Admin } = require("mongodb");
 const store_id = process.env.STORE_ID;
 const store_passwd = process.env.STORE_PASSWORD;
 const is_live = false;
@@ -183,6 +183,32 @@ async function run() {
       .db("garmentsinformation")
       .collection("address");
     const usercollection = client.db("garmentsinformation").collection("users");
+    const staffcollection = client
+      .db("garmentsinformation")
+      .collection("staff-info");
+    const verifyAdmin = async (req, res, next) => {
+      const decodedemail = req.decoded.email;
+      const query = {
+        email: decodedemail,
+      };
+      const user = await staffcollection.findOne(query);
+      if (user?.role !== "admin") {
+        return res.status(403).send({ message: "farbidden access" });
+      }
+      next();
+    };
+    app.put("/users/admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const option = { upsert: true };
+      const updatedoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await usercollection.updateOne(filter, updatedoc, option);
+      res.send(result);
+    });
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -583,7 +609,6 @@ async function run() {
         `${process.env.CLIENT_LINK}/cart/payment/failed?orderid=${orderid}`
       );
     });
-
     app.post("/payment/sucess", async (req, res) => {
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
@@ -830,13 +855,31 @@ async function run() {
       await usercollection.insertOne(userData);
       res.status(201).json({ message: "User created successfully" });
     });
+    app.get("/allusers", async (req, res) => {
+      const query = {};
+      const users = await usercollection.find(query).toArray();
+      res.send(users);
+    });
     app.get("/shopcategory", async (req, res) => {
       const query = {};
       const shopcategory = await shopcategorycollection.find(query).toArray();
       res.send(shopcategory);
     });
+    app.post("/shopproduct", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await shopproductcollection.insertOne(request_info);
+      res.send(result);
+    });
     app.get("/shopproduct", async (req, res) => {
       const query = {};
+      const shopproduct = await shopproductcollection.find(query).toArray();
+      res.send(shopproduct);
+    });
+    app.get("/shopproduct/:category_id", async (req, res) => {
+      const category_id = req.params.category_id;
+      console.log(category_id);
+      const query = { category_id: category_id };
       const shopproduct = await shopproductcollection.find(query).toArray();
       res.send(shopproduct);
     });
@@ -900,7 +943,6 @@ async function run() {
       if (decoded.email !== req.query.email) {
         return res.status(403).send({ message: "forbidden access" });
       }
-
       let Query = {};
       if (req.query.email) {
         Query = {
@@ -912,12 +954,33 @@ async function run() {
         .skip(page * size)
         .limit(size)
         .toArray();
-      let count = await shopordercollection.estimatedDocumentCount();
+      const emailproduct = await shopordercollection.find(Query).toArray();
+      console.log(emailproduct?.length);
+      // let count = await shopordercollection.estimatedDocumentCount();
+      let count = emailproduct?.length;
+
       if (search) {
         const idproduct = product.find((order) => order?.orderid === search);
         product = [idproduct];
         count = product.length;
       }
+
+      res.send({ count, product });
+    });
+    app.get("/allshoporders", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      let product = await shopordercollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      let count = await shopordercollection.estimatedDocumentCount();
 
       res.send({ count, product });
     });
@@ -941,7 +1004,34 @@ async function run() {
         .skip(page * size)
         .limit(size)
         .toArray();
+      const emailproduct = await ordercollection.find(Query).toArray();
+      // let count = await ordercollection.estimatedDocumentCount();
+      let count = emailproduct?.length;
+      if (search) {
+        const idproduct = product.find((order) => order?.orderid === search);
+        product = [idproduct];
+        count = product.length;
+      }
+
+      res.send({ count, product });
+    });
+    app.get("/allcustomizedorders", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      let product = await ordercollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      // const emailproduct = await ordercollection.find(Query).toArray();
       let count = await ordercollection.estimatedDocumentCount();
+      // let count = emailproduct?.length;
       if (search) {
         const idproduct = product.find((order) => order?.orderid === search);
         product = [idproduct];
@@ -1074,6 +1164,162 @@ async function run() {
       const product = await addresscollection.find(Query).limit(1).toArray();
       res.send(product);
     });
+    app.get("/staff", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const searchvalue = req.query.search;
+
+      let query = {};
+      if (searchvalue.length) {
+        query = {
+          $text: {
+            $search: searchvalue,
+          },
+        };
+      }
+      const product = await staffcollection.find(query).toArray();
+      let result = await staffcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = product?.length;
+      console.log(count);
+      res.send({ result, count });
+    });
+
+    app.get("/staff_name", verifyjwt, verifyAdmin, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const searchvalue = req.query.search;
+      console.log(searchvalue);
+      let query = {};
+      if (searchvalue.length) {
+        query = {
+          $text: {
+            $search: searchvalue,
+          },
+        };
+      }
+      const product = await staffcollection.find(query).toArray();
+      let result = await staffcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = product?.length;
+      console.log(count);
+      res.send({ result, count });
+    });
+    app.get("/single_staff", verifyjwt, verifyAdmin, async (req, res) => {
+      const email = req.query.email;
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      let query = {};
+      if (email) {
+        query = { email: email };
+      }
+      const staffs = await staffcollection.find(query).toArray();
+      let result = await staffcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = staffs?.length;
+
+      res.send({ result, count });
+    });
+    app.get("/single_staff_staff", verifyjwt, verifyAdmin, async (req, res) => {
+      const staff = req.query.staff;
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      console.log(staff);
+      let query = {};
+      if (staff) {
+        query = { role: staff };
+      }
+      const staffs = await staffcollection.find(query).toArray();
+      const result = await staffcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = staffs?.length;
+      res.send({ result, count });
+    });
+
+    app.post("/addstaff", async (req, res) => {
+      const staffinfo = req.body;
+      console.log(staffinfo);
+      const result = await staffcollection.insertOne(staffinfo);
+      res.send(result);
+      console.log(result);
+    });
+    app.put("/edit_staff/:id", async (req, res) => {
+      const staffinfo = req.body;
+
+      const id = req.params.id;
+      console.log(staffinfo, id);
+      const filter = {
+        _id: new ObjectId(id),
+      };
+      const option = {
+        upsert: true,
+      };
+      const updatedoc = {
+        $set: {
+          name: staffinfo?.name,
+          email: staffinfo?.email,
+          lastname: staffinfo?.lastname,
+          photo: staffinfo?.photo,
+          phone: staffinfo?.phone,
+          password: staffinfo?.password,
+          role: staffinfo?.role,
+          join_date: staffinfo?.join_date,
+        },
+      };
+      const result = await staffcollection.updateOne(filter, updatedoc, option);
+      res.send(result);
+    });
+    app.delete(
+      `/delete-staff/:id`,
+      verifyjwt,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        console.log(id);
+        const query = { _id: new ObjectId(id) };
+        const result = await staffcollection.deleteOne(query);
+        res.send(result);
+      }
+    );
+    app.put("/staff/admin/:id", verifyjwt, verifyAdmin, async (req, res) => {
+      const decodedemail = req.decoded.email;
+      console.log(decodedemail);
+      const id = req.params.id;
+      const filter = {
+        _id: new ObjectId(id),
+      };
+      const option = {
+        upsert: true,
+      };
+      const updatedoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await staffcollection.updateOne(filter, updatedoc, option);
+      res.send(result);
+    });
+    app.get(`/staff/admin/:email`, async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        email: email,
+      };
+      const user = await staffcollection.findOne(query);
+      res.send({ isAdmin: user?.role === "admin" });
+    });
+
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
     });

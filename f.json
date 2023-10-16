@@ -5,6 +5,8 @@
        "category_banner": "https://i.ibb.co/mHFD50g/sharibanner1.jpg",
        "products": [
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "01",
              "product_name": "Shari-29189",
              "Product_image": "https://i.ibb.co/hZMmY3H/shari1.jpg",
@@ -37,6 +39,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "02",
              "product_name": "Shari-29157",
              "Product_image": "https://i.ibb.co/fnMyh7Z/shari2.jpg",
@@ -69,6 +73,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "03",
              "product_name": "Shari-29192",
              "Product_image": "https://i.ibb.co/X8m0RDp/shari3.jpg",
@@ -101,6 +107,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "04",
              "product_name": "Shari-29167",
              "Product_image": "https://i.ibb.co/zrr6c9k/shari4.jpg",
@@ -133,6 +141,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "05",
              "product_name": "Shari-29433",
              "Product_image": "https://i.ibb.co/614CSW9/shari5.jpg",
@@ -165,6 +175,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "06",
              "product_name": "Shari-28979",
              "Product_image": "https://i.ibb.co/wL9c1vv/shari6.jpg",
@@ -197,6 +209,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "07",
              "product_name": "Shari-29641",
              "Product_image": "https://i.ibb.co/ckTpfq7/shari7.jpg",
@@ -229,6 +243,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "08",
              "product_name": "Shari-29380",
              "Product_image": "https://i.ibb.co/vB8yZHw/shari8.jpg",
@@ -261,6 +277,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "01",
+            "category_name": "Shari",
              "product_id": "09",
              "product_name": "Shari-291801",
              "Product_image": "https://i.ibb.co/nsfcb88/shari9.jpg",
@@ -300,6 +318,8 @@
        "category_banner": "https://i.ibb.co/LvFJ5Ss/kameezbanner.jpg",
        "products": [
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "01",
              "product_name": "Salwar Kameez Orna-A29257",
              "Product_image": "https://i.ibb.co/mXD0cyJ/kameez.jpg",
@@ -353,6 +373,8 @@
             ]
           },
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "02",
              "product_name": "Salwar kameez Orna-29407",
              "Product_image": "https://i.ibb.co/Kz3cZJN/kameez2.jpg",
@@ -406,6 +428,8 @@
             ]
           },
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "03",
              "product_name": "Salwar Kameez Orna-29029",
              "Product_image": "https://i.ibb.co/MMD6Kc8/kameez3.jpg",
@@ -459,6 +483,8 @@
             ]
           },
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "04",
              "product_name": "Salwar Kameez Orna-A29258",
              "Product_image": "https://i.ibb.co/vx65CB3/kameez4.jpg",
@@ -512,6 +538,8 @@
             ]
           },
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "05",
              "product_name": "Salwar Kameez Orna-A29259",
              "Product_image": "https://i.ibb.co/6ZbwKXJ/kameez5.jpg",
@@ -565,6 +593,8 @@
             ]
           },
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "06",
              "product_name": "Salwar Kameez Orna-A29260",
              "Product_image": "https://i.ibb.co/2Z4Pfdq/kameez6.jpg",
@@ -618,6 +648,8 @@
             ]
           },
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "07",
              "product_name": "Salwar Kameez Orna-A29261",
              "Product_image": "https://i.ibb.co/JjkXFr0/kameez7.jpg",
@@ -671,6 +703,8 @@
             ]
           },
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "08",
              "product_name": "Salwar Kameez Orna-A29262",
              "Product_image": "https://i.ibb.co/Gd8VJHJ/kameez8.jpg",
@@ -724,6 +758,8 @@
             ]
           },
           {
+            "category_id": "02",
+            "category_name": "Kameez",
              "product_id": "09",
              "product_name": "Salwar Kameez Orna-A29263",
              "Product_image": "https://i.ibb.co/YkcQrzF/kameez9.jpg",
@@ -784,6 +820,8 @@
        "category_banner": "https://i.ibb.co/bWhvJqM/topbanner.jpg",
        "products": [
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "01",
              "product_name": "Ladies Fatua-29334",
              "Product_image": "https://i.ibb.co/82sb2nJ/top1.jpg",
@@ -837,6 +875,8 @@
             ]
           },
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "02",
              "product_name": "Ladies Fatua-29335",
              "Product_image": "https://i.ibb.co/hDfhF7C/top2.jpg",
@@ -890,6 +930,8 @@
             ]
           },
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "03",
              "product_name": "Ladies Fatua-29336",
              "Product_image": "https://i.ibb.co/F6TJtwp/top3.jpg",
@@ -943,6 +985,8 @@
             ]
           },
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "04",
              "product_name": "Ladies Fatua-29337",
              "Product_image": "https://i.ibb.co/KqyY9qF/top4.jpg",
@@ -996,6 +1040,8 @@
             ]
           },
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "05",
              "product_name": "Ladies Fatua-29338",
              "Product_image": "https://i.ibb.co/gz3BsBL/top5.jpg",
@@ -1049,6 +1095,8 @@
             ]
           },
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "06",
              "product_name": "Ladies Fatua-29339",
              "Product_image": "https://i.ibb.co/ThCsYzb/top6.jpg",
@@ -1102,6 +1150,8 @@
             ]
           },
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "07",
              "product_name": "Ladies Fatua-29340",
              "Product_image": "https://i.ibb.co/b1FjFLN/top7.jpg",
@@ -1155,6 +1205,8 @@
             ]
           },
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "08",
              "product_name": "Ladies Fatua-29340",
              "Product_image": "https://i.ibb.co/1MLj1Tm/top8.jpg",
@@ -1208,6 +1260,8 @@
             ]
           },
           {
+            "category_id": "03",
+            "category_name": "Tops",
              "product_id": "09",
              "product_name": "Ladies Fatua-29342",
              "Product_image": "https://i.ibb.co/S6cpsyZ/top9.jpg",
@@ -1269,6 +1323,8 @@
        "category_banner": "https://i.ibb.co/sVtTG4s/shawalbanner.jpg",
        "products": [
           {
+            "category_id": "04",
+            "category_name": "Shawl",
              "product_id": "01",
              "product_name": "Shawl-26265",
              "Product_image": "https://i.ibb.co/717LgjX/shawal.jpg",
@@ -1300,6 +1356,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "04",
+            "category_name": "Shawl",
              "product_id": "02",
              "product_name": "Shawl-26266",
              "Product_image": "https://i.ibb.co/vYY678j/shawal1-1.jpg",
@@ -1331,6 +1389,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "04",
+            "category_name": "Shawl",
              "product_id": "03",
              "product_name": "Shawl-26267",
              "Product_image": "https://i.ibb.co/MpqLSK7/shawal3.jpg",
@@ -1362,6 +1422,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "04",
+            "category_name": "Shawl",
              "product_id": "04",
              "product_name": "Shawl-26267",
              "Product_image": "https://i.ibb.co/ZLQLnpX/shawal4.jpg",
@@ -1393,6 +1455,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "04",
+            "category_name": "Shawl",
              "product_id": "05",
              "product_name": "Shawl-26269",
              "Product_image": "https://i.ibb.co/F8FP3gQ/shaawal1-1.jpg",
@@ -1424,6 +1488,8 @@
              "available_date": " January 17, 2019"
           },
           {
+            "category_id": "04",
+            "category_name": "Shawl",
              "product_id": "06",
              "product_name": "Shawl-26265",
              "Product_image": "https://i.ibb.co/WzQz0bk/shawal5.jpg",
@@ -1463,6 +1529,8 @@
        "category_banner": "https://i.ibb.co/9WmpqGV/fatuabanner.jpg",
        "products": [
           {
+            "category_id": "05",
+            "category_name": "Fatua",
              "product_id": "01",
              "product_name": "Gents Fatua-26221",
              "Product_image": "https://i.ibb.co/zmzYkFj/fatua0.jpg",
@@ -1516,6 +1584,8 @@
             ]
           },
           {
+            "category_id": "05",
+            "category_name": "Fatua",
              "product_id": "02",
              "product_name": "Gents Fatua-26222",
              "Product_image": "https://i.ibb.co/CKrNT7W/fatua1.jpg",
@@ -1569,6 +1639,8 @@
             ]
           },
           {
+            "category_id": "05",
+            "category_name": "Fatua",
              "product_id": "03",
              "product_name": "Gents Fatua-26223",
              "Product_image": "https://i.ibb.co/W5dkZvF/fatua3.jpg",
@@ -1622,6 +1694,8 @@
             ]
           },
           {
+            "category_id": "05",
+            "category_name": "Fatua",
              "product_id": "04",
              "product_name": "Gents Fatua-26224",
              "Product_image": "https://i.ibb.co/8gfbH0g/fatu4.jpg",
@@ -1675,6 +1749,8 @@
             ]
           },
           {
+            "category_id": "05",
+            "category_name": "Fatua",
              "product_id": "05",
              "product_name": "Gents Fatua-26225",
              "Product_image": "https://i.ibb.co/rxgcbc8/fatu5.jpg",
@@ -1728,6 +1804,8 @@
             ]
           },
           {
+            "category_id": "05",
+            "category_name": "Fatua",
              "product_id": "06",
              "product_name": "Gents Fatua-26226",
              "Product_image": "https://i.ibb.co/54ycY2F/fatua2.jpg",
@@ -1789,6 +1867,8 @@
        "category_banner": "https://i.ibb.co/4TFX1m3/panjabibanner.jpg",
        "products": [
           {
+            "category_id": "06",
+            "category_name": "Panjabi",
              "product_id": "01",
              "product_name": "Panjabi-28751",
              "Product_image": "https://i.ibb.co/7NsyPKg/panjabi1-1.jpg",
@@ -1842,6 +1922,8 @@
             ]
           },
           {
+            "category_id": "06",
+            "category_name": "Panjabi",
              "product_id": "02",
              "product_name": "Panjabi-28752",
              "Product_image": "https://i.ibb.co/pwNdjpd/panjabi2.jpg",
@@ -1895,6 +1977,8 @@
             ]
           },
           {
+            "category_id": "06",
+            "category_name": "Panjabi",
              "product_id": "03",
              "product_name": "Panjabi-28753",
              "Product_image": "https://i.ibb.co/2YwNthc/panjabi5.jpg",
@@ -1948,6 +2032,8 @@
             ]
           },
           {
+            "category_id": "06",
+            "category_name": "Panjabi",
              "product_id": "04",
              "product_name": "Panjabi-28754",
              "Product_image": "https://i.ibb.co/Gsf1Pnv/panjabi4.jpg",
@@ -2001,6 +2087,8 @@
             ]
           },
           {
+            "category_id": "06",
+            "category_name": "Panjabi",
              "product_id": "05",
              "product_name": "Panjabi-28755",
              "Product_image": "https://i.ibb.co/T10S7St/panjabi3.jpg",
@@ -2054,6 +2142,8 @@
             ]
           },
           {
+            "category_id": "06",
+            "category_name": "Panjabi",
              "product_id": "06",
              "product_name": "Panjabi-28756",
              "Product_image": "https://i.ibb.co/Bq6qgm0/panjabi6.jpg",
@@ -2115,6 +2205,8 @@
        "category_banner": "https://i.ibb.co/82KkWXn/t-shirt.jpg",
        "products": [
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "01",
              "product_name": "T-Shirt-28491",
              "Product_image": "https://i.ibb.co/PCJjznP/white.jpg",
@@ -2168,6 +2260,8 @@
             ]
           },
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "02",
              "product_name": "T-Shirt-28492",
              "Product_image": "https://i.ibb.co/25GxM1L/black.jpg",
@@ -2221,6 +2315,8 @@
             ]
           },
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "03",
              "product_name": "T-Shirt-28493",
              "Product_image": "https://i.ibb.co/pnQJkwD/tomato.jpg",
@@ -2274,6 +2370,8 @@
             ]
           },
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "04",
              "product_name": "T-Shirt-28494",
              "Product_image": "https://i.ibb.co/19gFT3X/brown1.jpg",
@@ -2327,6 +2425,8 @@
             ]
           },
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "05",
              "product_name": "T-Shirt-28495",
              "Product_image": "https://i.ibb.co/TmXzrHq/t-shirt6a.jpg",
@@ -2380,6 +2480,8 @@
             ]
           },
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "06",
              "product_name": "T-Shirt-28496",
              "Product_image": "https://i.ibb.co/Q67TcyB/blue1.jpg",
@@ -2433,6 +2535,8 @@
             ]
           },
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "07",
              "product_name": "T-Shirt-28497",
              "Product_image": "https://i.ibb.co/NV4fb3d/tshirt1.jpg",
@@ -2486,6 +2590,8 @@
             ]
           },
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "08",
              "product_name": "T-Shirt-28498",
              "Product_image": "https://i.ibb.co/g7GV6Tw/t-shirt2.jpg",
@@ -2539,6 +2645,8 @@
             ]
           },
           {
+            "category_id": "07",
+            "category_name": "T-shirt",
              "product_id": "09",
              "product_name": "T-Shirt-28499",
              "Product_image": "https://i.ibb.co/2FDJKPf/t-shirt3.jpg",
@@ -2600,6 +2708,8 @@
        "category_banner": "https://i.ibb.co/qDXdmN9/shirtbanner.jpg",
        "products": [
           {
+            "category_id": "08",
+            "category_name": "Shirt",
              "product_id": "01",
              "product_name": "Shirt-28003",
              "Product_image": "https://i.ibb.co/d24jZG8/shirt5.jpg",
@@ -2653,6 +2763,8 @@
             ]
           },
           {
+            "category_id": "08",
+            "category_name": "Shirt",
              "product_id": "02",
              "product_name": "Shirt-28004",
              "Product_image": "https://i.ibb.co/C2t52Vy/shirt1.jpg",
@@ -2706,6 +2818,8 @@
             ]
           },
           {
+            "category_id": "08",
+            "category_name": "Shirt",
              "product_id": "03",
              "product_name": "Shirt-28005",
              "Product_image": "https://i.ibb.co/JkRt1X9/shirt6.jpg",
@@ -2759,6 +2873,8 @@
             ]
           },
           {
+            "category_id": "08",
+            "category_name": "Shirt",
              "product_id": "04",
              "product_name": "Shirt-28006",
              "Product_image": "https://i.ibb.co/3k0WvMt/shirt3.jpg",
@@ -2812,6 +2928,8 @@
             ]
           },
           {
+            "category_id": "08",
+            "category_name": "Shirt",
              "product_id": "05",
              "product_name": "Shirt-28007",
              "Product_image": "https://i.ibb.co/DVYGZyM/shirt2.jpg",
@@ -2865,6 +2983,8 @@
             ]
           },
           {
+            "category_id": "08",
+            "category_name": "Shirt",
              "product_id": "06",
              "product_name": "Shirt-28008",
              "Product_image": "https://i.ibb.co/nbYtkGR/shirt4.jpg",
