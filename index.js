@@ -162,9 +162,13 @@ async function run() {
     const shopcategorycollection = client
       .db("garmentsinformation")
       .collection("shopcategory");
-    const shopproductcollection = client
+    const shopprod1uctcollection = client
       .db("garmentsinformation")
       .collection("products");
+
+    const shopproductcollection = client
+      .db("garmentsinformation")
+      .collection("shopproduct");
 
     const shopordercollection = client
       .db("garmentsinformation")
@@ -876,12 +880,103 @@ async function run() {
       const shopproduct = await shopproductcollection.find(query).toArray();
       res.send(shopproduct);
     });
+
+    app.get("/shopmainproduct", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      // const minprice = req.query.minprice;
+      // const maxprice = req.query.maxprice;
+      // console.log(minprice, maxprice);
+      const query = {};
+      // const shopproduct = await shopprod1uctcollection.find(query).toArray();
+      let product = await shopprod1uctcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+
+      const count = await shopprod1uctcollection.estimatedDocumentCount();
+      res.send({ count, product });
+    });
+
+    app.get("/shopmainproduct/priceproduct", async (req, res) => {
+      const minprice = parseFloat(req.query.minprice);
+      const maxprice = parseFloat(req.query.maxprice);
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const color = req.query.color;
+      console.log(minprice, maxprice, color);
+      const query = {
+        $or: [
+          {
+            product_price: { $gt: minprice, $lt: maxprice },
+          },
+          {
+            product_price: { $eq: minprice, $eq: maxprice },
+          },
+        ],
+      };
+      if (color !== "not") {
+        console.log(color);
+        // Add the color condition to the query using the $and operator
+        query.$and = [{ color: color }];
+      }
+      const allproduct = await shopprod1uctcollection.find(query).toArray();
+      const product = await shopprod1uctcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = allproduct.length;
+      console.log(product, count);
+      res.send({ product, count });
+    });
+
     app.get("/shopproduct/:category_id", async (req, res) => {
       const category_id = req.params.category_id;
       console.log(category_id);
       const query = { category_id: category_id };
       const shopproduct = await shopproductcollection.find(query).toArray();
       res.send(shopproduct);
+    });
+
+    app.get("/shopmainproduct/:category_id", async (req, res) => {
+      const minprice = parseFloat(req.query.minprice);
+      const maxprice = parseFloat(req.query.maxprice);
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const color = req.query.color;
+      const category_id = req.params.category_id;
+      console.log(category_id, minprice, maxprice, color);
+      const query = {
+        $and: [
+          { category_id: category_id },
+          {
+            $or: [
+              {
+                product_price: { $gt: minprice, $lt: maxprice },
+              },
+              {
+                product_price: { $eq: minprice, $eq: maxprice },
+              },
+            ],
+          },
+        ],
+      };
+      if (color !== "not") {
+        console.log(color);
+        query.$and.push({ color: color });
+      }
+      // const query = { category_id: category_id };
+      const shopproduct = await shopprod1uctcollection.find(query).toArray();
+
+      const product = await shopprod1uctcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = shopproduct?.length;
+      res.send({ product, count });
     });
     app.get("/blogs", async (req, res) => {
       const query = {};
