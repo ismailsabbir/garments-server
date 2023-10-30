@@ -1,12 +1,12 @@
 const express = require("express");
-// const natural = require("natural");
+const natural = require("natural");
+const TfIdf = natural.TfIdf;
 var jwt = require("jsonwebtoken");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 const nodemailer = require("nodemailer");
-// const image = require("./Images/Logo.png");
 const stripe = require("stripe")(process.env.SECRET_KEY);
 const SSLCommerzPayment = require("sslcommerz-lts");
 const { MongoClient, ObjectId, Admin } = require("mongodb");
@@ -16,6 +16,7 @@ const is_live = false;
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
+const tfidf = new TfIdf();
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@cluster0.3w5podw.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri);
 
@@ -123,7 +124,6 @@ const sendsucessemail = (emaildata, emeil) => {
     }
   });
 };
-
 async function run() {
   await client.connect();
   try {
@@ -190,6 +190,11 @@ async function run() {
     const staffcollection = client
       .db("garmentsinformation")
       .collection("staff-info");
+
+    const products = await shopprod1uctcollection.find({}).toArray();
+    products.forEach((product) => {
+      tfidf.addDocument(product.category_name);
+    });
     const verifyAdmin = async (req, res, next) => {
       const decodedemail = req.decoded.email;
       const query = {
@@ -201,6 +206,94 @@ async function run() {
       }
       next();
     };
+
+    // function recommendProducts(userInterests) {
+    //   const tokenizedInterests = userInterests.toLowerCase().split(" ");
+    //   const userInterestsDoc = new TfIdf();
+    //   userInterestsDoc.addDocument(tokenizedInterests);
+    //   console.log(userInterestsDoc?.documents[0]);
+
+    //   const recommendations = [];
+    //   // products.forEach((product) => {
+    //   //   const similarity = tfidf.tfidf(
+    //   //     userInterestsDoc.documents[0],
+    //   //     product.category_name
+    //   //   );
+    //   //   if (similarity > 0.1) {
+    //   //     recommendations.push(product);
+    //   //   }
+    //   // });
+
+    //   products.forEach((product, productIndex) => {
+    //     const termToCompare = product?.category_name;
+    //     tfidf.tfidfs(termToCompare, function (documentIndex, measure) {
+    //       if (measure > 0.1) {
+    //         recommendations.push({
+    //           product: products[productIndex],
+    //           document: userInterestsDoc.documents[0],
+    //           similarity: measure,
+    //         });
+    //       }
+    //     });
+    //   });
+
+    //   console.log(recommendations);
+    //   return recommendations;
+    // }
+
+    function calculateContentBasedProductRecommendations(userPreferences) {
+      const featureWeights = {
+        wishlist: 0.1,
+        category: 0.5,
+        brand: 0.3,
+        userBehavior: 0.4,
+        cart: 0.2,
+      };
+      const recommendedProducts = [];
+      products.forEach((product) => {
+        const categorySimilarity =
+          userPreferences.interasted === product.category_name ? 1 : 0;
+        const brandSimilarity =
+          userPreferences.viewedProducts === product.category_name ? 1 : 0;
+        const userBehaviorSimilarity =
+          userPreferences.productcategory === product.category_name ? 1 : 0;
+        const cartSimilarity =
+          userPreferences.cartproduct === product.category_name ? 1 : 0;
+        const waislistproductSimilarity =
+          userPreferences.waislistproduct === product.category_name ? 1 : 0;
+
+        const totalSimilarity =
+          categorySimilarity * featureWeights.category +
+          brandSimilarity * featureWeights.brand +
+          waislistproductSimilarity * featureWeights.wishlist +
+          cartSimilarity * featureWeights.cart +
+          userBehaviorSimilarity * featureWeights.userBehavior;
+        // console.log(totalSimilarity);
+        if (totalSimilarity >= 0.1) {
+          recommendedProducts.push({
+            product: product,
+            similarityScore: totalSimilarity,
+          });
+        }
+      });
+      recommendedProducts.sort((a, b) => b.similarityScore - a.similarityScore);
+      const recommendedProductObjects = recommendedProducts.map(
+        (entry) => entry.product
+      );
+      return recommendedProductObjects;
+    }
+
+    app.post("/shop/recommend", (req, res) => {
+      const user = req.body;
+      const email = req.query.email;
+      console.log(email);
+      console.log(user);
+      const userInterests = user?.interasted;
+      const recommendedProducts =
+        calculateContentBasedProductRecommendations(user);
+      res.send(recommendedProducts);
+    });
+
     app.put("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -213,7 +306,6 @@ async function run() {
       const result = await usercollection.updateOne(filter, updatedoc, option);
       res.send(result);
     });
-
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
@@ -285,7 +377,12 @@ async function run() {
     });
     app.post("/shoporder", async (req, res) => {
       const request_info = req.body;
+      const categoryproduct = request_info?.productinfo?.[0];
+      const categoryname = categoryproduct?.category_name;
+      console.log(request_info, categoryname);
       const result = await shopordercollection.insertOne(request_info);
+      const userid = req.query.userid;
+      console.log(userid);
       sendemail(
         {
           subject: `Order Confirm`,
@@ -293,6 +390,35 @@ async function run() {
         },
         request_info?.email
       );
+
+      try {
+        const result = await usercollection.updateOne(
+          { _id: new ObjectId(userid) },
+          {
+            $set: {
+              interasted: categoryname,
+            },
+          }
+        );
+
+        if (result.modifiedCount === 1) {
+          console.log("update");
+          // sendemail({
+          //   subject: `Order Confirm`,
+          //   message: request_info,
+          // }, request_info?.email);
+
+          // res.send(request_info);
+        } else {
+          // Handle the case where the user wasn't found or not updated
+          res.status(404).send("User not found or not updated.");
+        }
+      } catch (error) {
+        // Handle any database or server errors
+        console.error("Error updating user:", error);
+        res.status(500).send("Internal server error.");
+      }
+
       res.send(request_info);
     });
     app.post("/cartorder", async (req, res) => {
@@ -312,9 +438,19 @@ async function run() {
       const sizes = await sizeollection.find(query).toArray();
       res.send(sizes);
     });
-    app.post("/cartproduct", async (req, res) => {
+    app.post("/cartproduct", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       const request_info = req.body;
+      console.log(request_info);
       const result = await cartproductcollection.insertOne(request_info);
+      const update = await usercollection.updateOne(
+        { email: req.query.email },
+        { $set: { cartproduct: request_info?.category_name } }
+      );
+      console.log(update);
       res.send(request_info);
     });
     app.get("/cartproduct", verifyjwt, async (req, res) => {
@@ -351,7 +487,7 @@ async function run() {
         .skip(page * size)
         .limit(size)
         .toArray();
-      let count = await cartproductcollection.estimatedDocumentCount();
+      let count = await cartproductcollection.countDocuments(Query);
       res.send({ count, product });
     });
     app.get("/mywishproduct", verifyjwt, async (req, res) => {
@@ -399,9 +535,18 @@ async function run() {
       const product = await ordercollection.find(Query).toArray();
       res.send(product);
     });
-    app.post("/wishlistproduct", async (req, res) => {
+    app.post("/wishlistproduct", verifyjwt, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       const request_info = req.body;
       const result = await wishlistproductcollection.insertOne(request_info);
+      const update = await usercollection.updateOne(
+        { email: req.query.email },
+        { $set: { waislistproduct: request_info?.category_name } }
+      );
+      console.log(update);
       res.send(request_info);
     });
     app.get("/wishlistproduct", async (req, res) => {
@@ -423,9 +568,10 @@ async function run() {
     });
     app.delete(`/cartproduct/:id`, async (req, res) => {
       const id = req.params.id;
+      console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await cartproductcollection.deleteOne(query);
-
+      console.log(result);
       res.send(result);
     });
     app.delete("/allcartproduct", async (req, res) => {
@@ -859,6 +1005,13 @@ async function run() {
       await usercollection.insertOne(userData);
       res.status(201).json({ message: "User created successfully" });
     });
+    app.get("/singleuser", async (req, res) => {
+      const email = req.query.email;
+      console.log(email);
+      const query = { email: email };
+      const user = await usercollection.findOne(query);
+      res.send(user);
+    });
     app.get("/allusers", async (req, res) => {
       const query = {};
       const users = await usercollection.find(query).toArray();
@@ -884,9 +1037,6 @@ async function run() {
     app.get("/shopmainproduct", async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
-      // const minprice = req.query.minprice;
-      // const maxprice = req.query.maxprice;
-      // console.log(minprice, maxprice);
       const query = {};
       // const shopproduct = await shopprod1uctcollection.find(query).toArray();
       let product = await shopprod1uctcollection
@@ -900,13 +1050,13 @@ async function run() {
     });
 
     app.get("/shopmainproduct/priceproduct", async (req, res) => {
+      const search = req.query.serach;
       const minprice = parseFloat(req.query.minprice);
       const maxprice = parseFloat(req.query.maxprice);
       const page = req.query.page;
       const size = parseInt(req.query.size);
       const color = req.query.color;
-      console.log(minprice, maxprice, color);
-      const query = {
+      let query = {
         $or: [
           {
             product_price: { $gt: minprice, $lt: maxprice },
@@ -916,25 +1066,77 @@ async function run() {
           },
         ],
       };
+
       if (color !== "not") {
-        console.log(color);
-        // Add the color condition to the query using the $and operator
         query.$and = [{ color: color }];
       }
-      const allproduct = await shopprod1uctcollection.find(query).toArray();
-      const product = await shopprod1uctcollection
-        .find(query)
-        .skip(page * size)
-        .limit(size)
-        .toArray();
-      const count = allproduct.length;
-      console.log(product, count);
-      res.send({ product, count });
+      if (search) {
+        query.$text = {
+          $search: search,
+        };
+      }
+
+      const pipeline = [
+        {
+          $match: query,
+        },
+        {
+          $facet: {
+            product: [{ $skip: page * size }, { $limit: size }],
+            count: [
+              {
+                $count: "total",
+              },
+            ],
+          },
+        },
+      ];
+      const result = await shopprod1uctcollection.aggregate(pipeline).toArray();
+
+      if (result.length > 0) {
+        const { product, count } = result[0];
+        res.send({ product, count: count[0] ? count[0].total : 0 });
+      } else {
+        res.send({ product: [], count: 0 });
+      }
+
+      // const product = await shopprod1uctcollection
+      //   .find(query)
+      //   .skip(page * size)
+      //   .limit(size)
+      //   .toArray();
+      // const count = await shopprod1uctcollection.countDocuments(query);
+      // console.log(count);
+      // res.send({ product, count });
+    });
+    app.get("/shopmainproduct/searchproduct", async (req, res) => {
+      const search = req.query.serach;
+      let query = {};
+      if (search.length) {
+        query = {
+          $text: {
+            $search: search,
+          },
+        };
+      }
+      const product = await shopprod1uctcollection.find(query).toArray();
+      const count = product.length;
+      res.send({ count, product });
     });
 
     app.get("/shopproduct/:category_id", async (req, res) => {
       const category_id = req.params.category_id;
-      console.log(category_id);
+      const email = req.query.email;
+      const category = req.query.category;
+      console.log(email);
+      const userUpdateQuery = { email: email };
+      const userUpdateData = {
+        viewedProducts: category,
+      };
+      const result = await usercollection.updateOne(userUpdateQuery, {
+        $set: userUpdateData,
+      });
+      console.log(result);
       const query = { category_id: category_id };
       const shopproduct = await shopproductcollection.find(query).toArray();
       res.send(shopproduct);
@@ -947,7 +1149,8 @@ async function run() {
       const size = parseInt(req.query.size);
       const color = req.query.color;
       const category_id = req.params.category_id;
-      console.log(category_id, minprice, maxprice, color);
+      const email = req.query.email;
+      console.log(email);
       const query = {
         $and: [
           { category_id: category_id },
@@ -967,15 +1170,12 @@ async function run() {
         console.log(color);
         query.$and.push({ color: color });
       }
-      // const query = { category_id: category_id };
-      const shopproduct = await shopprod1uctcollection.find(query).toArray();
-
       const product = await shopprod1uctcollection
         .find(query)
         .skip(page * size)
         .limit(size)
         .toArray();
-      const count = shopproduct?.length;
+      const count = await shopprod1uctcollection.countDocuments(query);
       res.send({ product, count });
     });
     app.get("/blogs", async (req, res) => {
@@ -1215,6 +1415,23 @@ async function run() {
         },
       };
       const result = await usercollection.updateOne(filter, updateuser, option);
+      res.send(result);
+    });
+    app.put("/usercategory", async (req, res) => {
+      const email = req.query.email;
+      const filter = {
+        email: email,
+      };
+      const productcategory = req.body.firstCategoryName;
+      console.log(productcategory);
+      const option = { upsert: true };
+      const updateuser = {
+        $set: {
+          productcategory,
+        },
+      };
+      const result = await usercollection.updateOne(filter, updateuser, option);
+      console.log(result);
       res.send(result);
     });
     app.post("/address", verifyjwt, async (req, res) => {
