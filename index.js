@@ -1025,7 +1025,7 @@ async function run() {
     app.post("/shopproduct", async (req, res) => {
       const request_info = req.body;
       console.log(request_info);
-      const result = await shopproductcollection.insertOne(request_info);
+      const result = await shopprod1uctcollection.insertOne(request_info);
       res.send(result);
     });
     app.get("/shopproduct", async (req, res) => {
@@ -1033,7 +1033,20 @@ async function run() {
       const shopproduct = await shopproductcollection.find(query).toArray();
       res.send(shopproduct);
     });
+    app.get("/shopallproduct", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      console.log(page, size);
+      const query = {};
+      let product = await shopprod1uctcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
 
+      const count = await shopprod1uctcollection.estimatedDocumentCount();
+      res.send({ count, product });
+    });
     app.get("/shopmainproduct", async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
@@ -1056,6 +1069,7 @@ async function run() {
       const page = req.query.page;
       const size = parseInt(req.query.size);
       const color = req.query.color;
+
       let query = {
         $or: [
           {
@@ -1099,15 +1113,6 @@ async function run() {
       } else {
         res.send({ product: [], count: 0 });
       }
-
-      // const product = await shopprod1uctcollection
-      //   .find(query)
-      //   .skip(page * size)
-      //   .limit(size)
-      //   .toArray();
-      // const count = await shopprod1uctcollection.countDocuments(query);
-      // console.log(count);
-      // res.send({ product, count });
     });
     app.get("/shopmainproduct/searchproduct", async (req, res) => {
       const search = req.query.serach;
@@ -1513,13 +1518,14 @@ async function run() {
           },
         };
       }
-      const product = await staffcollection.find(query).toArray();
+      // const product = await staffcollection.find(query).toArray();
       let result = await staffcollection
         .find(query)
         .skip(page * size)
         .limit(size)
         .toArray();
-      const count = product?.length;
+      // const count = product?.length;
+      const count = await staffcollection.countDocuments(query);
       console.log(count);
       res.send({ result, count });
     });
@@ -1592,6 +1598,101 @@ async function run() {
       };
       const result = await staffcollection.updateOne(filter, updatedoc, option);
       res.send(result);
+    });
+    app.put("/edit_product/:id", async (req, res) => {
+      try {
+        const staffInfo = req.body;
+        const id = req.params.id;
+        console.log(staffInfo);
+        const filter = {
+          _id: new ObjectId(id),
+        };
+        const options = {
+          upsert: false,
+        };
+        const updateDoc = {
+          $set: {
+            product_name: staffinfo?.product_name,
+            category_name: staffinfo?.category_name,
+            product_price: staffinfo?.product_price,
+            availavle: staffinfo?.availavle,
+            description: staffinfo?.description,
+            brand: staffinfo?.brand,
+            fabric: staffinfo?.fabric,
+            Product_image: staffinfo?.Product_image,
+            daisplay_image: staffinfo?.daisplay_image,
+          },
+        };
+        const result = await shopprod1uctcollection.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        console.log(result);
+        if (result.matchedCount === 1) {
+          res.status(200).send(result);
+        } else if (result.upsertedCount === 1) {
+          res.status(201).send({ message: "Product created" });
+        } else {
+          res.status(404).send({ message: "Product not found" });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
+
+      // const staffinfo = req.body;
+      // const id = req.params.id;
+      // console.log(staffinfo, id);
+      // const filter = {
+      //   _id: new ObjectId(id),
+      // };
+      // const option = {
+      //   upsert: true,
+      // };
+      // const updatedoc = {
+      //   $set: {
+      //     product_name: staffinfo?.product_name,
+      //     category_name: staffinfo?.category_name,
+      //     product_price: staffinfo?.product_price,
+      //     availavle: staffinfo?.availavle,
+      //     description: staffinfo?.description,
+      //     brand: staffinfo?.brand,
+      //     fabric: staffinfo?.fabric,
+      //     Product_image: staffinfo?.Product_image,
+      //     daisplay_image: staffinfo?.daisplay_image,
+      //   },
+      // };
+      // const result = await shopprod1uctcollection.updateOne(
+      //   filter,
+      //   updatedoc,
+      //   option
+      // );
+
+      // res.send(result);
+    });
+    app.delete("/delete-products", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = { _id: { $in: productIds.map((id) => new ObjectId(id)) } };
+      try {
+        // const result = await shopprod1uctcollection.deleteMany({
+        //   _id: { $in: productIds },
+        // });
+        const result = await shopprod1uctcollection.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json({ message: "Products deleted successfully" });
+        } else {
+          res.status(404).json({ message: "No products found for deletion" });
+          console.log("no products found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting products", error: error.message });
+        console.log("error");
+      }
     });
     app.delete(
       `/delete-staff/:id`,
