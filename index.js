@@ -1026,12 +1026,33 @@ async function run() {
       const request_info = req.body;
       console.log(request_info);
       const result = await shopprod1uctcollection.insertOne(request_info);
+      console.log(result);
       res.send(result);
     });
     app.get("/shopproduct", async (req, res) => {
       const query = {};
       const shopproduct = await shopproductcollection.find(query).toArray();
       res.send(shopproduct);
+    });
+    app.get(`/detailsproduct/:categoryid/:id`, async (req, res) => {
+      const categoryid = req.params.categoryid;
+      const productid = req.params.id;
+      console.log(categoryid, productid);
+      try {
+        const product = await shopprod1uctcollection.findOne({
+          category_id: categoryid,
+          product_id: productid,
+        });
+
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.json(product);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+      }
     });
     app.get("/shopallproduct", async (req, res) => {
       const page = req.query.page;
@@ -1051,7 +1072,6 @@ async function run() {
       const page = req.query.page;
       const size = parseInt(req.query.size);
       const query = {};
-      // const shopproduct = await shopprod1uctcollection.find(query).toArray();
       let product = await shopprod1uctcollection
         .find(query)
         .skip(page * size)
@@ -1603,7 +1623,7 @@ async function run() {
       try {
         const staffInfo = req.body;
         const id = req.params.id;
-        console.log(staffInfo);
+        console.log(staffInfo, id);
         const filter = {
           _id: new ObjectId(id),
         };
@@ -1612,15 +1632,15 @@ async function run() {
         };
         const updateDoc = {
           $set: {
-            product_name: staffinfo?.product_name,
-            category_name: staffinfo?.category_name,
-            product_price: staffinfo?.product_price,
-            availavle: staffinfo?.availavle,
-            description: staffinfo?.description,
-            brand: staffinfo?.brand,
-            fabric: staffinfo?.fabric,
-            Product_image: staffinfo?.Product_image,
-            daisplay_image: staffinfo?.daisplay_image,
+            product_name: staffInfo?.product_name,
+            category_name: staffInfo?.category_name,
+            product_price: staffInfo?.product_price,
+            availavle: staffInfo?.availavle,
+            description: staffInfo?.description,
+            brand: staffInfo?.brand,
+            fabric: staffInfo?.fabric,
+            Product_image: staffInfo?.Product_image,
+            daisplay_image: staffInfo?.daisplay_image,
           },
         };
         const result = await shopprod1uctcollection.updateOne(
@@ -1682,7 +1702,7 @@ async function run() {
         const result = await shopprod1uctcollection.deleteMany(query);
         console.log(result);
         if (result.deletedCount > 0) {
-          res.json({ message: "Products deleted successfully" });
+          res.json(result);
         } else {
           res.status(404).json({ message: "No products found for deletion" });
           console.log("no products found for deletion");
