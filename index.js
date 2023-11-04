@@ -1054,20 +1054,7 @@ async function run() {
         res.status(500).json({ message: "Server error" });
       }
     });
-    app.get("/shopallproduct", async (req, res) => {
-      const page = req.query.page;
-      const size = parseInt(req.query.size);
-      console.log(page, size);
-      const query = {};
-      let product = await shopprod1uctcollection
-        .find(query)
-        .skip(page * size)
-        .limit(size)
-        .toArray();
 
-      const count = await shopprod1uctcollection.estimatedDocumentCount();
-      res.send({ count, product });
-    });
     app.get("/shopmainproduct", async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
@@ -1100,7 +1087,6 @@ async function run() {
           },
         ],
       };
-
       if (color !== "not") {
         query.$and = [{ color: color }];
       }
@@ -1109,7 +1095,6 @@ async function run() {
           $search: search,
         };
       }
-
       const pipeline = [
         {
           $match: query,
@@ -1126,13 +1111,48 @@ async function run() {
         },
       ];
       const result = await shopprod1uctcollection.aggregate(pipeline).toArray();
-
       if (result.length > 0) {
         const { product, count } = result[0];
         res.send({ product, count: count[0] ? count[0].total : 0 });
       } else {
         res.send({ product: [], count: 0 });
       }
+    });
+
+    app.get("/shopallproduct", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = req.query.search;
+      const category = req.query.category;
+      const reset = req.query.reset;
+      const status = req.query.status;
+
+      console.log(category, typeof category);
+      let query = {};
+      if (reset === "true") {
+        console.log("reset");
+        query = {};
+      } else if (category.length > 1 && category !== "undefined") {
+        console.log(typeof category);
+        query = { $text: { $search: category } };
+      } else if (search && search.length > 1) {
+        console.log(search);
+        query = { product_name: search };
+      } else if (status) {
+        console.log(status);
+        query = { stock: status };
+      } else {
+        query = {};
+      }
+      let product = await shopprod1uctcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+
+      const count = await shopprod1uctcollection.countDocuments(query);
+
+      res.send({ count, product });
     });
     app.get("/shopmainproduct/searchproduct", async (req, res) => {
       const search = req.query.serach;
