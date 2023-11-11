@@ -74,7 +74,6 @@ const sendemail = (emaildata, emeil) => {
       console.log(error);
     } else {
       console.log("Email sent: " + info.response);
-      // do something useful
     }
   });
 };
@@ -143,6 +142,9 @@ async function run() {
     const categorycollections = client
       .db("garmentsinformation")
       .collection("project-category");
+    const colorcollection = client
+      .db("garmentsinformation")
+      .collection("color");
 
     const categorydetailscollections = client
       .db("garmentsinformation")
@@ -340,24 +342,33 @@ async function run() {
       const category = await categorycollections.find(query).toArray();
       res.send(category);
     });
+    app.get("/color", async (req, res) => {
+      const query = {};
+      const color = await colorcollection.find(query).toArray();
+      res.send(color);
+    });
     app.get(`/customized-details/:id`, async (req, res) => {
       const id = req.params.id;
       const query = { category_id: id };
       const category = await categorydetailscollections.findOne(query);
       res.send(category);
     });
+
     app.get("/colorproducts", async (req, res) => {
       const categoryid = req.query.category_id;
       const colorid = req.query.colorid;
+      console.log(categoryid, colorid);
       const query = {
         category_id: categoryid,
       };
       const products = await colorproductcollections.find(query).toArray();
+      console.log(products);
       const colorproduct = products.filter(
         (product) => product.color_id === colorid
       );
       res.send(colorproduct);
     });
+
     app.get("/quality", async (req, res) => {
       const query = {};
       const quality = await qualitycollections.find(query).toArray();
@@ -1022,10 +1033,50 @@ async function run() {
       const shopcategory = await shopcategorycollection.find(query).toArray();
       res.send(shopcategory);
     });
+    app.get("/shopdascategory", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = req.query.search;
+      const reset = req.query.reset;
+      console.log(reset);
+      let query = {};
+      if (reset === "true") {
+        console.log(reset);
+        query = {};
+      } else if (search.length > 1 && search) {
+        console.log(search);
+        query.$text = {
+          $search: search,
+        };
+      }
+      const shopcategory = await shopcategorycollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = await shopcategorycollection.countDocuments(query);
+      console.log(count);
+      res.send({ count, shopcategory });
+    });
+
     app.post("/shopproduct", async (req, res) => {
       const request_info = req.body;
       console.log(request_info);
       const result = await shopprod1uctcollection.insertOne(request_info);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/customized-pproduct", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await colorproductcollections.insertOne(request_info);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/shopcategory", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await shopcategorycollection.insertOne(request_info);
       console.log(result);
       res.send(result);
     });
@@ -1118,7 +1169,56 @@ async function run() {
         res.send({ product: [], count: 0 });
       }
     });
+    app.get("/customized-details-all", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const query = {};
+      const category = await categorydetailscollections
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = await categorydetailscollections.countDocuments(query);
 
+      res.send({ count, category });
+    });
+    app.get("/customized-color-product-all", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = req.query.search;
+      const categor = req.query.category;
+      const reset = req.query.reset;
+      const status = req.query.status;
+      console.log(search, categor, reset, status);
+      let query = {};
+      if (reset === "true") {
+        console.log("reset");
+        query = {};
+      } else if (categor.length > 1 && categor !== "undefined") {
+        console.log(typeof categor);
+        query = { $text: { $search: categor } };
+      } else if (search && search.length > 1) {
+        console.log(search);
+        query = { name: search };
+      } else if (status === "IN STOCK") {
+        console.log(status);
+        query = { availavle: { $gt: 0 } };
+      } else if (status === "STOCK OUT") {
+        console.log(status);
+        query = { availavle: { $lt: 1 } };
+      } else {
+        query = {};
+      }
+      console.log(query);
+      const category = await colorproductcollections
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = await colorproductcollections.countDocuments(query);
+
+      res.send({ count, category });
+    });
     app.get("/shopallproduct", async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
@@ -1154,6 +1254,7 @@ async function run() {
 
       res.send({ count, product });
     });
+
     app.get("/shopmainproduct/searchproduct", async (req, res) => {
       const search = req.query.serach;
       let query = {};
@@ -1680,45 +1781,91 @@ async function run() {
         console.error(error);
         res.status(500).send("Internal Server Error");
       }
-
-      // const staffinfo = req.body;
-      // const id = req.params.id;
-      // console.log(staffinfo, id);
-      // const filter = {
-      //   _id: new ObjectId(id),
-      // };
-      // const option = {
-      //   upsert: true,
-      // };
-      // const updatedoc = {
-      //   $set: {
-      //     product_name: staffinfo?.product_name,
-      //     category_name: staffinfo?.category_name,
-      //     product_price: staffinfo?.product_price,
-      //     availavle: staffinfo?.availavle,
-      //     description: staffinfo?.description,
-      //     brand: staffinfo?.brand,
-      //     fabric: staffinfo?.fabric,
-      //     Product_image: staffinfo?.Product_image,
-      //     daisplay_image: staffinfo?.daisplay_image,
-      //   },
-      // };
-      // const result = await shopprod1uctcollection.updateOne(
-      //   filter,
-      //   updatedoc,
-      //   option
-      // );
-
-      // res.send(result);
+    });
+    app.put("/edit_custom_product/:id", async (req, res) => {
+      try {
+        const staffInfo = req.body;
+        const id = req.params.id;
+        console.log(staffInfo, id);
+        const filter = {
+          _id: new ObjectId(id),
+        };
+        const options = {
+          upsert: false,
+        };
+        const updateDoc = {
+          $set: {
+            category_id: staffInfo?.category_id,
+            name: staffInfo?.name,
+            availavle: staffInfo?.availavle,
+            availavle: staffInfo?.availavle,
+            default_price: staffInfo?.default_price,
+            custom_price: staffInfo?.custom_price,
+            color_id: staffInfo?.color_id,
+            color_name: staffInfo?.color_name,
+            color: staffInfo?.color,
+            image: staffInfo.image,
+          },
+        };
+        const result = await colorproductcollections.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        console.log(result);
+        if (result.matchedCount === 1) {
+          res.status(200).send(result);
+        } else if (result.upsertedCount === 1) {
+          res.status(201).send({ message: "Product created" });
+        } else {
+          res.status(404).send({ message: "Product not found" });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+    app.put("/edit_category/:id", async (req, res) => {
+      try {
+        const categoryinfo = req.body;
+        const id = req.params.id;
+        // console.log(staffInfo, id);
+        const filter = {
+          _id: new ObjectId(id),
+        };
+        const options = {
+          upsert: false,
+        };
+        const updateDoc = {
+          $set: {
+            category_name: categoryinfo?.category_name,
+            category_id: categoryinfo?.category_id,
+            category_image: categoryinfo?.category_image,
+          },
+        };
+        const result = await shopcategorycollection.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        console.log(result);
+        if (result.matchedCount === 1) {
+          res.status(200).send(result);
+        } else if (result.upsertedCount === 1) {
+          res.status(201).send({ message: "Product created" });
+        } else {
+          res.status(404).send({ message: "Product not found" });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
     app.delete("/delete-products", async (req, res) => {
       const productIds = req.body;
       console.log(productIds);
       const query = { _id: { $in: productIds.map((id) => new ObjectId(id)) } };
       try {
-        // const result = await shopprod1uctcollection.deleteMany({
-        //   _id: { $in: productIds },
-        // });
         const result = await shopprod1uctcollection.deleteMany(query);
         console.log(result);
         if (result.deletedCount > 0) {
@@ -1734,6 +1881,94 @@ async function run() {
         console.log("error");
       }
     });
+    app.delete("/delete-customized-products", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = { _id: { $in: productIds.map((id) => new ObjectId(id)) } };
+      try {
+        const result = await colorproductcollections.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No products found for deletion" });
+          console.log("no products found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting products", error: error.message });
+        console.log("error");
+      }
+    });
+
+    app.delete("/delete-category", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = {
+        _id: { $in: productIds.map((id) => new ObjectId(id)) },
+      };
+      try {
+        const result = await shopcategorycollection.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No products found for deletion" });
+          console.log("no products found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting products", error: error.message });
+        console.log("error");
+      }
+    });
+    app.delete("/delete-single-product", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = {
+        _id: { $in: productIds.map((id) => new ObjectId(id)) },
+      };
+      try {
+        const result = await shopprod1uctcollection.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No products found for deletion" });
+          console.log("no products found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting products", error: error.message });
+        console.log("error");
+      }
+    });
+    app.delete("/delete-single-custom-product", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = {
+        _id: { $in: productIds.map((id) => new ObjectId(id)) },
+      };
+      try {
+        const result = await colorproductcollections.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No products found for deletion" });
+          console.log("no products found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting products", error: error.message });
+        console.log("error");
+      }
+    });
+
     app.delete(
       `/delete-staff/:id`,
       verifyjwt,

@@ -1,0 +1,25 @@
+[
+    {
+        "category_id":"01",
+        "name":"T-Shirt",
+        "availavle":100,
+        "default_price":"120",
+        "custom_price":"150",
+        "color_id":"1",
+        "color_name":"white",
+        "color":"https://i.ibb.co/h2xL013/white.jpg",
+        "image":"https://i.ibb.co/jL20J8V/whitet-shart.webp"
+    
+        },
+        {
+            "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":100,
+            "default_price":"120",
+            "custom_price":"150",
+            "color_id":"3",
+            "color_name":"black",
+            "color":"https://i.ibb.co/vXvcPBk/black.png",
+            "image":"https://i.ibb.co/S6V43yw/blackt-shart.webp"
+        }
+]

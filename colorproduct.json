@@ -2,14 +2,23 @@
     
        {
         "category_id":"01",
+        "name":"T-Shirt",
+        "availavle":"100",
+        "default_price":"120",
+        "custom_price":"150",
         "color_id":"1",
         "color_name":"white",
         "color":"https://i.ibb.co/h2xL013/white.jpg",
         "image":"https://i.ibb.co/jL20J8V/whitet-shart.webp"
+    
         },
 
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"2",
             "color_name":"gray",
             "color":"https://i.ibb.co/Ytb5Wvs/grat.jpg"
@@ -17,6 +26,10 @@
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"3",
             "color_name":"black",
             "color":"https://i.ibb.co/vXvcPBk/black.png",
@@ -24,6 +37,10 @@
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"4",
             "color_name":"blue",
             "color":"https://i.ibb.co/CB9XSmC/blue.jpg",
@@ -31,6 +48,10 @@
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"5",
             "color_name":"navi-blue",
             "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp",
@@ -38,18 +59,30 @@
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"6",
             "color_name":"sky-blue",
             "color":"https://i.ibb.co/yQgXpCf/skyblue.jpg"
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"7",
             "color_name":"yellow",
             "color":"https://i.ibb.co/nLbpZt4/yellow.jpg"
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"8",
             "color_name":"orange",
             "color":"https://i.ibb.co/YNJX1f1/orange.jpg",
@@ -57,6 +90,10 @@
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"9",
             "color_name":"red",
             "color":"https://i.ibb.co/5kGHbJP/read.jpg",
@@ -64,12 +101,20 @@
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"10",
             "color_name":"pink",
             "color":"https://i.ibb.co/VCBmrfZ/pink.jpg"
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"11",
             "color_name":"brown",
             "color":"https://i.ibb.co/d0rLZv8/brown.jpg",
@@ -77,6 +122,10 @@
         },
         {
             "category_id":"01",
+            "name":"T-Shirt",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"12",
             "color_name":"green",
             "color":"https://i.ibb.co/yPCxWzs/green.png",
@@ -88,6 +137,10 @@
 
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"1",
             "color_name":"white",
             "color":"https://i.ibb.co/h2xL013/white.jpg",
@@ -95,6 +148,10 @@
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"2",
             "color_name":"gray",
             "color":"https://i.ibb.co/Ytb5Wvs/grat.jpg"
@@ -102,6 +159,10 @@
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"3",
             "color_name":"black",
             "color":"https://i.ibb.co/vXvcPBk/black.png",
@@ -109,6 +170,10 @@
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"4",
             "color_name":"blue",
             "color":"https://i.ibb.co/CB9XSmC/blue.jpg",
@@ -116,6 +181,10 @@
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"5",
             "color_name":"navi-blue",
             "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp",
@@ -123,18 +192,30 @@
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"6",
             "color_name":"sky-blue",
             "color":"https://i.ibb.co/yQgXpCf/skyblue.jpg"
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"7",
             "color_name":"yellow",
             "color":"https://i.ibb.co/nLbpZt4/yellow.jpg"
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"8",
             "color_name":"orange",
             "color":"https://i.ibb.co/YNJX1f1/orange.jpg",
@@ -142,18 +223,30 @@
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"9",
             "color_name":"red",
             "color":"https://i.ibb.co/5kGHbJP/read.jpg"
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"10",
             "color_name":"pink",
             "color":"https://i.ibb.co/VCBmrfZ/pink.jpg"
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"11",
             "color_name":"brown",
             "color":"https://i.ibb.co/d0rLZv8/brown.jpg",
@@ -161,6 +254,10 @@
         },
         {
             "category_id":"02",
+            "name":"Polo", 
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"12",
             "color_name":"green",
             "color":"https://i.ibb.co/yPCxWzs/green.png",
@@ -172,6 +269,10 @@
 
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"1",
             "color_name":"white",
             "color":"https://i.ibb.co/h2xL013/white.jpg",
@@ -179,6 +280,10 @@
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"2",
             "color_name":"gray",
             "color":"https://i.ibb.co/Ytb5Wvs/grat.jpg"
@@ -186,6 +291,10 @@
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"3",
             "color_name":"black",
             "color":"https://i.ibb.co/vXvcPBk/black.png",
@@ -193,54 +302,90 @@
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"4",
             "color_name":"blue",
             "color":"https://i.ibb.co/CB9XSmC/blue.jpg"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"5",
             "color_name":"navi-blue",
             "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"6",
             "color_name":"sky-blue",
             "color":"https://i.ibb.co/yQgXpCf/skyblue.jpg"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"7",
             "color_name":"yellow",
             "color":"https://i.ibb.co/nLbpZt4/yellow.jpg"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"8",
             "color_name":"orange",
             "color":"https://i.ibb.co/YNJX1f1/orange.jpg"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"9",
             "color_name":"red",
             "color":"https://i.ibb.co/5kGHbJP/read.jpg"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"10",
             "color_name":"pink",
             "color":"https://i.ibb.co/VCBmrfZ/pink.jpg"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"11",
             "color_name":"brown",
             "color":"https://i.ibb.co/d0rLZv8/brown.jpg"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"12",
             "color_name":"green",
             "color":"https://i.ibb.co/yPCxWzs/green.png"
@@ -251,6 +396,10 @@
 
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"1",
             "color_name":"white",
             "color":"https://i.ibb.co/h2xL013/white.jpg",
@@ -258,12 +407,20 @@
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"2",
             "color_name":"gray",
             "color":"https://i.ibb.co/Ytb5Wvs/grat.jpg"
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"3",
             "color_name":"black",
             "color":"https://i.ibb.co/vXvcPBk/black.png",
@@ -271,12 +428,20 @@
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"4",
             "color_name":"blue",
             "color":"https://i.ibb.co/CB9XSmC/blue.jpg"
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"5",
             "color_name":"navi-blue",
             "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp",
@@ -284,6 +449,10 @@
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"6",
             "color_name":"sky-blue",
             "color":"https://i.ibb.co/yQgXpCf/skyblue.jpg",
@@ -291,18 +460,30 @@
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"7",
             "color_name":"yellow",
             "color":"https://i.ibb.co/nLbpZt4/yellow.jpg"
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"8",
             "color_name":"orange",
             "color":"https://i.ibb.co/YNJX1f1/orange.jpg"
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"9",
             "color_name":"red",
             "color":"https://i.ibb.co/5kGHbJP/read.jpg",
@@ -310,6 +491,10 @@
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"10",
             "color_name":"pink",
             "color":"https://i.ibb.co/VCBmrfZ/pink.jpg",
@@ -317,12 +502,20 @@
         },
         {
             "category_id":"04",
+            "name":"Cap", 
+            "availavle":"100",
+            "default_price":"100",
+            "custom_price":"120",
             "color_id":"11",
             "color_name":"brown",
             "color":"https://i.ibb.co/d0rLZv8/brown.jpg"
         },
         {
             "category_id":"03",
+            "name":"Jersey",
+            "availavle":"100",
+            "default_price":"120",
+            "custom_price":"150",
             "color_id":"12",
             "color_name":"green",
             "color":"https://i.ibb.co/yPCxWzs/green.png"
@@ -333,6 +526,10 @@
 
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"1",
             "color_name":"white",
             "color":"https://i.ibb.co/h2xL013/white.jpg",
@@ -340,6 +537,10 @@
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"2",
             "color_name":"gray",
             "color":"https://i.ibb.co/Ytb5Wvs/grat.jpg",
@@ -348,24 +549,40 @@
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"3",
             "color_name":"black",
             "color":"https://i.ibb.co/vXvcPBk/black.png"
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"4",
             "color_name":"blue",
             "color":"https://i.ibb.co/CB9XSmC/blue.jpg"
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"5",
             "color_name":"navi-blue",
             "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp"
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"6",
             "color_name":"sky-blue",
             "color":"https://i.ibb.co/yQgXpCf/skyblue.jpg",
@@ -373,36 +590,60 @@
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"7",
             "color_name":"yellow",
             "color":"https://i.ibb.co/nLbpZt4/yellow.jpg"
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"8",
             "color_name":"orange",
             "color":"https://i.ibb.co/YNJX1f1/orange.jpg"
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"9",
             "color_name":"red",
             "color":"https://i.ibb.co/5kGHbJP/read.jpg"
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"10",
             "color_name":"pink",
             "color":"https://i.ibb.co/VCBmrfZ/pink.jpg"
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"11",
             "color_name":"brown",
             "color":"https://i.ibb.co/d0rLZv8/brown.jpg"
         },
         {
             "category_id":"05",
+            "name":"Shirt",
+            "availavle":"100",
+            "default_price":"220",
+            "custom_price":"250",
             "color_id":"12",
             "color_name":"green",
             "color":"https://i.ibb.co/yPCxWzs/green.png"
@@ -414,6 +655,10 @@
 
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"1",
             "color_name":"white",
             "color":"https://i.ibb.co/h2xL013/white.jpg",
@@ -421,6 +666,10 @@
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"2",
             "color_name":"gray",
             "color":"https://i.ibb.co/Ytb5Wvs/grat.jpg",
@@ -429,6 +678,10 @@
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"3",
             "color_name":"black",
             "color":"https://i.ibb.co/vXvcPBk/black.png",
@@ -436,6 +689,10 @@
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"4",
             "color_name":"blue",
             "color":"https://i.ibb.co/CB9XSmC/blue.jpg",
@@ -443,30 +700,50 @@
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"5",
             "color_name":"navi-blue",
             "color":"https://i.ibb.co/Q7WyQyQ/naviblue1.webp"
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"6",
             "color_name":"sky-blue",
             "color":"https://i.ibb.co/yQgXpCf/skyblue.jpg"
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"7",
             "color_name":"yellow",
             "color":"https://i.ibb.co/nLbpZt4/yellow.jpg"
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"8",
             "color_name":"orange",
             "color":"https://i.ibb.co/YNJX1f1/orange.jpg"
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"9",
             "color_name":"red",
             "color":"https://i.ibb.co/5kGHbJP/read.jpg",
@@ -474,18 +751,30 @@
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"10",
             "color_name":"pink",
             "color":"https://i.ibb.co/VCBmrfZ/pink.jpg"
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"11",
             "color_name":"brown",
             "color":"https://i.ibb.co/d0rLZv8/brown.jpg"
         },
         {
             "category_id":"06",
+            "name":"Hoodie",
+            "availavle":"100",
+            "default_price":"280",
+            "custom_price":"300",
             "color_id":"12",
             "color_name":"green",
             "color":"https://i.ibb.co/yPCxWzs/green.png"
