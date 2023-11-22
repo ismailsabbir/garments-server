@@ -1,0 +1,23 @@
+[
+    {
+        "category_id":"01",
+        "name":"T-Shirt",
+        "image":"https://i.ibb.co/k3qVhFt/t-shart.jpg",
+        "text":"Get custom t-shirt with your design Printed on it.",
+        "availavle":"100"
+    },
+    {
+        "category_id":"02",
+        "name":"Polo",
+        "image":"https://i.ibb.co/D47q142/polo1.jpg",
+        "text":"Get custom polp with your design Printed on it.",
+        "availavle":"100"
+    },
+    {
+        "category_id":"03",
+        "name":"Jersey",
+        "image":"https://i.ibb.co/Nj7GHFk/jersey.jpg",
+        "text":"Get custom jersey with your design Printed on it.",
+        "availavle":"100"
+    }
+]

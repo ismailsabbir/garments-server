@@ -349,11 +349,20 @@ async function run() {
     });
     app.get(`/customized-details/:id`, async (req, res) => {
       const id = req.params.id;
+      console.log("id=====", id);
       const query = { category_id: id };
       const category = await categorydetailscollections.findOne(query);
+      console.log("category", category);
       res.send(category);
     });
-
+    app.get("/customized-single-details", async (req, res) => {
+      const categoryid = req.query.categoryid;
+      console.log(categoryid);
+      const query = { category_id: categoryid };
+      const category = await categorydetailscollections.findOne(query);
+      console.log("category", category);
+      res.send(category);
+    });
     app.get("/colorproducts", async (req, res) => {
       const categoryid = req.query.category_id;
       const colorid = req.query.colorid;
@@ -449,11 +458,8 @@ async function run() {
       const sizes = await sizeollection.find(query).toArray();
       res.send(sizes);
     });
-    app.post("/cartproduct", verifyjwt, async (req, res) => {
-      const decoded = req.decoded;
-      if (decoded.email !== req.query.email) {
-        return res.status(403).send({ message: "forbidden access" });
-      }
+    app.post("/cartproduct", async (req, res) => {
+      console.log("cart");
       const request_info = req.body;
       console.log(request_info);
       const result = await cartproductcollection.insertOne(request_info);
@@ -461,7 +467,6 @@ async function run() {
         { email: req.query.email },
         { $set: { cartproduct: request_info?.category_name } }
       );
-      console.log(update);
       res.send(request_info);
     });
     app.get("/cartproduct", verifyjwt, async (req, res) => {
@@ -546,18 +551,18 @@ async function run() {
       const product = await ordercollection.find(Query).toArray();
       res.send(product);
     });
-    app.post("/wishlistproduct", verifyjwt, async (req, res) => {
-      const decoded = req.decoded;
-      if (decoded.email !== req.query.email) {
-        return res.status(403).send({ message: "forbidden access" });
-      }
+    app.post("/wishlistproduct", async (req, res) => {
+      // const decoded = req.decoded;
+      // if (decoded.email !== req.query.email) {
+      //   return res.status(403).send({ message: "forbidden access" });
+      // }
       const request_info = req.body;
+      console.log(request_info);
       const result = await wishlistproductcollection.insertOne(request_info);
       const update = await usercollection.updateOne(
         { email: req.query.email },
         { $set: { waislistproduct: request_info?.category_name } }
       );
-      console.log(update);
       res.send(request_info);
     });
     app.get("/wishlistproduct", async (req, res) => {
@@ -1068,15 +1073,56 @@ async function run() {
     });
     app.post("/customized-pproduct", async (req, res) => {
       const request_info = req.body;
-      console.log(request_info);
-      const result = await colorproductcollections.insertOne(request_info);
-      console.log(result);
-      res.send(result);
+      const colorObject = await categorydetailscollections
+        .aggregate([
+          {
+            $match: {
+              category_id: request_info.category_id,
+            },
+          },
+          {
+            $match: {
+              "colors.color_id": request_info.color_id,
+            },
+          },
+        ])
+        .toArray();
+      console.log(colorObject);
+      if (colorObject.length >= 1) {
+        console.log("already addede");
+        res
+          .status(200)
+          .json({ message: "This product is already present in your DB" });
+      } else {
+        const result = await colorproductcollections.insertOne(request_info);
+        console.log(result);
+        const updateresult = await categorydetailscollections.updateOne(
+          { category_id: request_info.category_id },
+          {
+            $push: {
+              colors: {
+                color_id: request_info.color_id,
+                color_name: request_info.color_name,
+                color: request_info.color,
+              },
+            },
+          }
+        );
+        console.log(updateresult);
+        res.send(result);
+      }
     });
     app.post("/shopcategory", async (req, res) => {
       const request_info = req.body;
       console.log(request_info);
       const result = await shopcategorycollection.insertOne(request_info);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/customizedcategory", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await categorycollections.insertOne(request_info);
       console.log(result);
       res.send(result);
     });
@@ -1172,16 +1218,41 @@ async function run() {
     app.get("/customized-details-all", async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
-      const query = {};
-      const category = await categorydetailscollections
+      const search = req.query.search;
+      const reset = req.query.reset;
+      console.log(reset);
+      let query = {};
+      if (reset === "true") {
+        console.log(reset);
+        query = {};
+      } else if (search.length > 1 && search) {
+        console.log(search);
+        query.$text = {
+          $search: search,
+        };
+      }
+      const category = await categorycollections
         .find(query)
         .skip(page * size)
         .limit(size)
         .toArray();
-      const count = await categorydetailscollections.countDocuments(query);
-
+      const count = await categorycollections.countDocuments(query);
+      console.log(count);
       res.send({ count, category });
+
+      // const page = req.query.page;
+      // const size = parseInt(req.query.size);
+      // const query = {};
+      // const category = await categorycollections
+      //   .find(query)
+      //   .skip(page * size)
+      //   .limit(size)
+      //   .toArray();
+      // const count = await categorycollections.countDocuments(query);
+
+      // res.send({ count, category });
     });
+
     app.get("/customized-color-product-all", async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
@@ -1861,6 +1932,61 @@ async function run() {
         res.status(500).send("Internal Server Error");
       }
     });
+
+    app.put("/edit-customized_category/:id", async (req, res) => {
+      try {
+        const categoryinfo = req.body;
+        const id = req.params.id;
+        const filter = {
+          category_id: id,
+        };
+        const options = {
+          upsert: false,
+        };
+        const updateDoc = {
+          $set: {
+            category_id: categoryinfo?.category_id,
+            name: categoryinfo?.name,
+            image: categoryinfo?.image,
+            text: categoryinfo?.text,
+            availavle: categoryinfo.availavle,
+          },
+        };
+        const updateDoc1 = {
+          $set: {
+            category_id: categoryinfo?.category_id,
+            name: categoryinfo?.name,
+            availavle: categoryinfo.availavle,
+            colors: categoryinfo.colors,
+            default_price: categoryinfo.default_price,
+            custom_price: categoryinfo.custom_price,
+          },
+        };
+        const updatedetails = await categorydetailscollections.updateOne(
+          filter,
+          updateDoc1,
+          options
+        );
+        const result = await categorycollections.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        console.log(result);
+        console.log(updatedetails);
+        if (result.matchedCount === 1 && updatedetails.matchedCount === 1) {
+          res.status(200).send(result);
+        } else if (result.upsertedCount === 1) {
+          res.status(201).send({ message: "Product created" });
+        } else {
+          res.status(404).send({ message: "Product not found" });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
     app.delete("/delete-products", async (req, res) => {
       const productIds = req.body;
       console.log(productIds);
@@ -1883,22 +2009,36 @@ async function run() {
     });
     app.delete("/delete-customized-products", async (req, res) => {
       const productIds = req.body;
-      console.log(productIds);
-      const query = { _id: { $in: productIds.map((id) => new ObjectId(id)) } };
+      const query = {
+        _id: { $in: productIds.map((id) => new ObjectId(id)) },
+      };
       try {
+        const products = await colorproductcollections.find(query).toArray();
         const result = await colorproductcollections.deleteMany(query);
-        console.log(result);
+        await Promise.all(
+          products.map(async (product) => {
+            const query = { category_id: product.category_id };
+            const categoryuproduct = await categorydetailscollections.findOne(
+              query
+            );
+            const coloridentify = categoryuproduct.colors.filter(
+              (colors) => colors.color_id !== product.color_id
+            );
+            const category_update = await categorydetailscollections.updateOne(
+              { category_id: product.category_id },
+              { $set: { colors: coloridentify } }
+            );
+          })
+        );
         if (result.deletedCount > 0) {
           res.json(result);
         } else {
           res.status(404).json({ message: "No products found for deletion" });
-          console.log("no products found for deletion");
         }
       } catch (error) {
         res
           .status(500)
           .json({ message: "Error deleting products", error: error.message });
-        console.log("error");
       }
     });
 
@@ -1924,6 +2064,30 @@ async function run() {
         console.log("error");
       }
     });
+
+    app.delete("/delete-customized-category", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = {
+        _id: { $in: productIds.map((id) => new ObjectId(id)) },
+      };
+      try {
+        const result = await categorycollections.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No products found for deletion" });
+          console.log("no products found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting products", error: error.message });
+        console.log("error");
+      }
+    });
+
     app.delete("/delete-single-product", async (req, res) => {
       const productIds = req.body;
       console.log(productIds);
@@ -1948,13 +2112,23 @@ async function run() {
     });
     app.delete("/delete-single-custom-product", async (req, res) => {
       const productIds = req.body;
-      console.log(productIds);
+      const product_id = req.query.product_category;
+      const color_id = req.query.product_color;
       const query = {
         _id: { $in: productIds.map((id) => new ObjectId(id)) },
       };
       try {
         const result = await colorproductcollections.deleteMany(query);
-        console.log(result);
+        const categoryuproduct = await categorydetailscollections.findOne({
+          category_id: product_id,
+        });
+        const coloridentify = categoryuproduct.colors.filter(
+          (colors) => colors.color_id !== color_id
+        );
+        const category_update = await categorydetailscollections.updateOne(
+          { category_id: product_id },
+          { $set: { colors: coloridentify } }
+        );
         if (result.deletedCount > 0) {
           res.json(result);
         } else {
@@ -1965,7 +2139,6 @@ async function run() {
         res
           .status(500)
           .json({ message: "Error deleting products", error: error.message });
-        console.log("error");
       }
     });
 
