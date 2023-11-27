@@ -209,40 +209,6 @@ async function run() {
       next();
     };
 
-    // function recommendProducts(userInterests) {
-    //   const tokenizedInterests = userInterests.toLowerCase().split(" ");
-    //   const userInterestsDoc = new TfIdf();
-    //   userInterestsDoc.addDocument(tokenizedInterests);
-    //   console.log(userInterestsDoc?.documents[0]);
-
-    //   const recommendations = [];
-    //   // products.forEach((product) => {
-    //   //   const similarity = tfidf.tfidf(
-    //   //     userInterestsDoc.documents[0],
-    //   //     product.category_name
-    //   //   );
-    //   //   if (similarity > 0.1) {
-    //   //     recommendations.push(product);
-    //   //   }
-    //   // });
-
-    //   products.forEach((product, productIndex) => {
-    //     const termToCompare = product?.category_name;
-    //     tfidf.tfidfs(termToCompare, function (documentIndex, measure) {
-    //       if (measure > 0.1) {
-    //         recommendations.push({
-    //           product: products[productIndex],
-    //           document: userInterestsDoc.documents[0],
-    //           similarity: measure,
-    //         });
-    //       }
-    //     });
-    //   });
-
-    //   console.log(recommendations);
-    //   return recommendations;
-    // }
-
     function calculateContentBasedProductRecommendations(userPreferences) {
       const featureWeights = {
         wishlist: 0.1,
@@ -1479,23 +1445,91 @@ async function run() {
 
       res.send({ count, product });
     });
-    app.get("/allshoporders", verifyjwt, async (req, res) => {
-      const page = req.query.page;
-      const size = parseInt(req.query.size);
-      const decoded = req.decoded;
-      if (decoded.email !== req.query.email) {
-        return res.status(403).send({ message: "forbidden access" });
-      }
-      let Query = {};
-      let product = await shopordercollection
-        .find(Query)
-        .skip(page * size)
-        .limit(size)
-        .toArray();
-      let count = await shopordercollection.estimatedDocumentCount();
 
-      res.send({ count, product });
+    app.get("/allshoporders", verifyjwt, async (req, res) => {
+      try {
+        const page = req.query.page;
+        const size = parseInt(req.query.size);
+        const search = req.query.search;
+        const orderDate = parseInt(req.query.orderDate);
+        const reset = req.query.reset;
+        const today = new Date();
+        const fiveDaysAgo = new Date(today);
+        fiveDaysAgo.setDate(today.getDate() - orderDate);
+        console.log(orderDate);
+        let query = {};
+        if (reset === "true") {
+          query = {};
+        } else if (orderDate) {
+          const fiveDaysAgo = new Date(today);
+          fiveDaysAgo.setDate(today.getDate() - parseInt(orderDate));
+          const startDay = fiveDaysAgo.getDate();
+          const startMonth = fiveDaysAgo.getMonth() + 1;
+          const startYear = fiveDaysAgo.getFullYear();
+          const endDay = today.getDate();
+          const endMonth = today.getMonth() + 1;
+          const endYear = today.getFullYear();
+          query = {
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    {
+                      $dateFromString: {
+                        dateString: "$order_date",
+                        format: "%d/%m/%Y",
+                      },
+                    },
+                    new Date(`${startYear}-${startMonth}-${startDay}`),
+                  ],
+                },
+                {
+                  $lte: [
+                    {
+                      $dateFromString: {
+                        dateString: "$order_date",
+                        format: "%d/%m/%Y",
+                      },
+                    },
+                    new Date(`${endYear}-${endMonth}-${endDay}`),
+                  ],
+                },
+              ],
+            },
+          };
+        } else if (search && search.length > 1) {
+          console.log(search);
+          query = { $text: { $search: search } };
+        }
+        // else if (status) {
+        //   console.log(status);
+        //   query = { stock: status };
+        // }
+        else {
+          query = {};
+        }
+        let product = await shopordercollection
+          .find(query)
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+        const count = await shopordercollection.countDocuments(query);
+        res.send({ count, product });
+      } catch (error) {
+        console.log(error);
+      }
     });
+
+    // const parseDate = (dateString) => {
+    //   if (typeof dateString !== "string" || dateString.length !== 10) {
+    //     console.error("Invalid date string format. Expected MM/DD/YYYY.");
+    //     throw new Error("Invalid date string format");
+    //   }
+
+    //   const [month, day, year] = dateString.split("/").map(Number);
+    //   console.log(new Date(year, month - 1, day));
+    //   return new Date(year, month - 1, day);
+    // };
     app.get("/customizedorders", verifyjwt, async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
