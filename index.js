@@ -396,7 +396,6 @@ async function run() {
 
           // res.send(request_info);
         } else {
-          // Handle the case where the user wasn't found or not updated
           res.status(404).send("User not found or not updated.");
         }
       } catch (error) {
@@ -407,6 +406,18 @@ async function run() {
 
       res.send(request_info);
     });
+    setInterval(async () => {
+      try {
+        const oneHourAgo = new Date(Date.now() - 60 * 1000);
+        await shopordercollection.updateMany(
+          { order: "not paid", createdAt: { $lte: oneHourAgo } },
+          { status: "canceled" }
+        );
+      } catch (error) {
+        console.error("Automatic cancellation error:", error);
+      }
+    }, 60 * 60 * 1000);
+
     app.post("/cartorder", async (req, res) => {
       const request_info = req.body;
       const result = await cartordercollection.insertOne(request_info);
@@ -1457,9 +1468,55 @@ async function run() {
         const fiveDaysAgo = new Date(today);
         fiveDaysAgo.setDate(today.getDate() - orderDate);
         console.log(orderDate);
+        const startDate = req.query.startDate;
+        const endDate = req.query.endDate;
+        console.log(startDate);
+        console.log("end", endDate);
         let query = {};
         if (reset === "true") {
           query = {};
+        } else if (
+          startDate &&
+          endDate &&
+          startDate.trim() !== "" &&
+          endDate.trim() !== ""
+        ) {
+          const startDateParts = startDate.split("-");
+          const startDay = parseInt(startDateParts[2]);
+          const startMonth = parseInt(startDateParts[1]);
+          const startYear = parseInt(startDateParts[0]);
+          const endDateParts = endDate.split("-");
+          const endDay = parseInt(endDateParts[2]);
+          const endMonth = parseInt(endDateParts[1]);
+          const endYear = parseInt(endDateParts[0]);
+          query = {
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    {
+                      $dateFromString: {
+                        dateString: "$order_date",
+                        format: "%d/%m/%Y",
+                      },
+                    },
+                    new Date(`${startYear}-${startMonth}-${startDay}`),
+                  ],
+                },
+                {
+                  $lte: [
+                    {
+                      $dateFromString: {
+                        dateString: "$order_date",
+                        format: "%d/%m/%Y",
+                      },
+                    },
+                    new Date(`${endYear}-${endMonth}-${endDay}`),
+                  ],
+                },
+              ],
+            },
+          };
         } else if (orderDate) {
           const fiveDaysAgo = new Date(today);
           fiveDaysAgo.setDate(today.getDate() - parseInt(orderDate));
@@ -1520,16 +1577,6 @@ async function run() {
       }
     });
 
-    // const parseDate = (dateString) => {
-    //   if (typeof dateString !== "string" || dateString.length !== 10) {
-    //     console.error("Invalid date string format. Expected MM/DD/YYYY.");
-    //     throw new Error("Invalid date string format");
-    //   }
-
-    //   const [month, day, year] = dateString.split("/").map(Number);
-    //   console.log(new Date(year, month - 1, day));
-    //   return new Date(year, month - 1, day);
-    // };
     app.get("/customizedorders", verifyjwt, async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
