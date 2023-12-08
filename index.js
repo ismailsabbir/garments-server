@@ -43,6 +43,8 @@ const sendemail = (emaildata, emeil) => {
       pass: process.env.PASS,
     },
   });
+  const imageUrl =
+    "https://i.ibb.co/KqGcS3M/385565151-1096613294836586-7043829326437074719-n.png";
   const mailOptions = {
     from: process.env.EMAIL,
     to: emeil,
@@ -50,13 +52,14 @@ const sendemail = (emaildata, emeil) => {
     html: `
     <html>
     <head>
-      <title>Order Confirmation</title>
+      <title> ${emaildata?.subject}</title>
       <link rel="stylesheet" type="text/css" href="/design.css">
     </head>
     <body>
       <div style="background-color: #F4F7F8; padding: 10px; text-align: center; font-size: 15px;">
+      <img src="${imageUrl}" alt="Your Image" style="max-width: 100%;width: 200px; height: 100px;margin-bottom: 20px;" />
         <p style="color: blue; font-size: 1.1rem; font-weight: 500;">Order id# ${emaildata?.message.orderid}</p>
-        <h5>Your Order is Confirmed</h5>
+        <h5>Your ${emaildata?.subject}</h5>
         <p>Date Ordered:${emaildata.message.order_date}</p>
         <p>Shipping Address</p>
         <p>${emaildata?.message?.name}</p>
@@ -408,15 +411,65 @@ async function run() {
     });
     setInterval(async () => {
       try {
-        const oneHourAgo = new Date(Date.now() - 60 * 1000);
-        await shopordercollection.updateMany(
-          { order: "not paid", createdAt: { $lte: oneHourAgo } },
-          { status: "canceled" }
-        );
+        const oneHourAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+        const ordersToCancel = await shopordercollection
+          .find({
+            order: "not paid",
+            status: "Pending",
+            createdAt: { $lte: oneHourAgo },
+          })
+          .toArray();
+
+        // Update status for each order
+        for (const order of ordersToCancel) {
+          console.log(order._id);
+          const result = await shopordercollection.updateOne(
+            { _id: order._id },
+            { $set: { status: "canceled" } }
+          );
+
+          console.log(result);
+
+          // Send email for each order
+          await sendemail(
+            {
+              subject: `Order cancel`,
+              message: order,
+            },
+            order?.email
+          );
+        }
       } catch (error) {
         console.error("Automatic cancellation error:", error);
       }
-    }, 60 * 60 * 1000);
+    }, 30 * 60 * 1000);
+    // setInterval(async () => {
+    //   try {
+    //     const oneHourAgo = new Date(Date.now() - 60 * 1000).toISOString();
+    //     const result = await shopordercollection.updateMany(
+    //       { order: "not paid", createdAt: { $lte: oneHourAgo } },
+    //       { $set: { status: "canceled" } }
+    //     );
+    //     console.log(result);
+    //   } catch (error) {
+    //     console.error("Automatic cancellation error:", error);
+    //   }
+    // }, 60 * 1000);
+
+    app.get("/oneorder", async (req, res) => {
+      const oneHourAgo = new Date(Date.now() - 60 * 1000).toISOString();
+      console.log(typeof oneHourAgo);
+      console.log(oneHourAgo);
+      const result = await shopordercollection
+        .find({
+          order: "not paid",
+          createdAt: { $lte: oneHourAgo },
+        })
+        .toArray();
+      res.send(result);
+    });
+
+    // 2023-12-02T12:04:59.565Z
 
     app.post("/cartorder", async (req, res) => {
       const request_info = req.body;
