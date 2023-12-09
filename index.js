@@ -365,49 +365,43 @@ async function run() {
       res.send(request_info);
     });
     app.post("/shoporder", async (req, res) => {
-      const request_info = req.body;
-      const categoryproduct = request_info?.productinfo?.[0];
-      const categoryname = categoryproduct?.category_name;
-      console.log(request_info, categoryname);
-      const result = await shopordercollection.insertOne(request_info);
-      const userid = req.query.userid;
-      console.log(userid);
-      sendemail(
-        {
-          subject: `Order Confirm`,
-          message: request_info,
-        },
-        request_info?.email
-      );
-
       try {
-        const result = await usercollection.updateOne(
-          { _id: new ObjectId(userid) },
+        const request_info = req.body;
+        const categoryproduct = request_info?.productinfo?.[0];
+        const categoryname = categoryproduct?.category_name;
+        const result = await shopordercollection.insertOne(request_info);
+        const userid = req.query.userid;
+        sendemail(
           {
-            $set: {
-              interasted: categoryname,
-            },
-          }
+            subject: `Order Confirm`,
+            message: request_info,
+          },
+          request_info?.email
         );
 
-        if (result.modifiedCount === 1) {
-          console.log("update");
-          // sendemail({
-          //   subject: `Order Confirm`,
-          //   message: request_info,
-          // }, request_info?.email);
+        try {
+          const result = await usercollection.updateOne(
+            { _id: new ObjectId(userid) },
+            {
+              $set: {
+                interasted: categoryname,
+              },
+            }
+          );
 
-          // res.send(request_info);
-        } else {
-          res.status(404).send("User not found or not updated.");
+          if (result.modifiedCount === 1) {
+            // console.log("update");
+          } else {
+            // res.status(404).send("User not found or not updated.");
+          }
+        } catch (error) {
+          // res.status(500).send("Internal server error.");
         }
-      } catch (error) {
-        // Handle any database or server errors
-        console.error("Error updating user:", error);
-        res.status(500).send("Internal server error.");
-      }
 
-      res.send(request_info);
+        res.send(request_info);
+      } catch (error) {
+        console.log(error);
+      }
     });
     setInterval(async () => {
       try {
@@ -419,8 +413,6 @@ async function run() {
             createdAt: { $lte: oneHourAgo },
           })
           .toArray();
-
-        // Update status for each order
         for (const order of ordersToCancel) {
           console.log(order._id);
           const result = await shopordercollection.updateOne(
@@ -429,8 +421,6 @@ async function run() {
           );
 
           console.log(result);
-
-          // Send email for each order
           await sendemail(
             {
               subject: `Order cancel`,
@@ -442,20 +432,7 @@ async function run() {
       } catch (error) {
         console.error("Automatic cancellation error:", error);
       }
-    }, 30 * 60 * 1000);
-    // setInterval(async () => {
-    //   try {
-    //     const oneHourAgo = new Date(Date.now() - 60 * 1000).toISOString();
-    //     const result = await shopordercollection.updateMany(
-    //       { order: "not paid", createdAt: { $lte: oneHourAgo } },
-    //       { $set: { status: "canceled" } }
-    //     );
-    //     console.log(result);
-    //   } catch (error) {
-    //     console.error("Automatic cancellation error:", error);
-    //   }
-    // }, 60 * 1000);
-
+    }, 5 * 60 * 1000);
     app.get("/oneorder", async (req, res) => {
       const oneHourAgo = new Date(Date.now() - 60 * 1000).toISOString();
       console.log(typeof oneHourAgo);
@@ -469,7 +446,34 @@ async function run() {
       res.send(result);
     });
 
-    // 2023-12-02T12:04:59.565Z
+    app.put(`/update_order_status/:id`, async (req, res) => {
+      const orderid = req.params.id;
+      const orderinfo = req.body;
+      const status = req.query.status;
+      const options = { upsert: true };
+      const filter = { _id: new ObjectId(orderid) };
+      const updateorder = {
+        $set: {
+          status: status,
+        },
+      };
+      const result = await shopordercollection.updateOne(
+        filter,
+        updateorder,
+        options
+      );
+      console.log(result);
+      if (result?.modifiedCount >= 1) {
+        sendemail(
+          {
+            subject: `Order is ${status} `,
+            message: orderinfo,
+          },
+          orderinfo?.email
+        );
+      }
+      res.send(result);
+    });
 
     app.post("/cartorder", async (req, res) => {
       const request_info = req.body;
@@ -634,13 +638,15 @@ async function run() {
         currency: "bdt",
         payment_method_types: ["card"],
       });
-
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
     });
     app.put(`/payment/:id`, async (req, res) => {
+      console.log("/payment/:id");
+      console.log("bkash  ");
       const id = parseInt(req.params.id);
+      console.log("pay,emnt", id);
       const paymentinfo = req.body;
       const options = { upsert: true };
       const filter = { orderid: id };
@@ -658,6 +664,9 @@ async function run() {
       const orderdata = await ordercollection.findOne({
         transiction_id: paymentinfo.transiction_id,
       });
+
+      console.log("order data= ", orderdata);
+
       sendsucessemail(
         {
           subject: `Order & Payment Sucessfully !!!`,
@@ -761,6 +770,7 @@ async function run() {
       });
     });
     app.post("/cart/payment/sucess", async (req, res) => {
+      console.log("/cart/payment/sucess");
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
 
@@ -784,6 +794,25 @@ async function run() {
         const orderdata = await shopordercollection.findOne({
           transiction_id: transiction_id,
         });
+        console.log("orderdata", orderdata?.productinfo);
+        for (const productInfo of orderdata?.productinfo) {
+          const productId = productInfo._id;
+          const quantityToDecrease = productInfo.quentuty;
+          console.log(productId, quantityToDecrease);
+          await shopprod1uctcollection.updateOne(
+            {
+              category_id: productInfo?.category_id,
+              category_name: productInfo?.category_name,
+              product_id: productInfo?.product_id,
+            },
+            {
+              $inc: {
+                availavle: -quantityToDecrease,
+              },
+            }
+          );
+        }
+
         sendsucessemail(
           {
             subject: `Order & Payment Sucessfully !!!`,
@@ -806,6 +835,7 @@ async function run() {
       );
     });
     app.post("/payment/sucess", async (req, res) => {
+      console.log("/payment/sucess");
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
       if (!transiction_id || !orderid) {
@@ -895,6 +925,7 @@ async function run() {
       });
     });
     app.post("/product/payment/sucess", async (req, res) => {
+      console.log("/product/payment/sucess");
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
       if (!transiction_id || !orderid) {
@@ -917,7 +948,24 @@ async function run() {
         const orderdata = await shopordercollection.findOne({
           transiction_id: transiction_id,
         });
-        console.log(orderdata);
+
+        console.log("/product/payment/sucess", orderdata?.productinfo);
+
+        for (const productInfo of orderdata?.productinfo) {
+          const productId = productInfo._id;
+          const quantityToDecrease = productInfo.quentuty;
+          console.log(productId, quantityToDecrease);
+
+          await shopprod1uctcollection.updateOne(
+            { _id: new ObjectId(productId) },
+            {
+              $inc: {
+                availavle: -quantityToDecrease,
+              },
+            }
+          );
+        }
+
         sendsucessemail(
           {
             subject: `Order & Payment Sucessfully !!!`,
@@ -979,6 +1027,7 @@ async function run() {
       res.send(order);
     });
     app.put(`/shoppayment/:id`, async (req, res) => {
+      console.log("shoppayment");
       const id = parseInt(req.params.id);
       const paymentinfo = req.body;
 
@@ -1000,6 +1049,22 @@ async function run() {
         transiction_id: paymentinfo.transiction_id,
       });
       console.log(orderdata);
+
+      for (const productInfo of orderdata?.productinfo) {
+        const productId = productInfo._id;
+        const quantityToDecrease = productInfo.quentuty;
+        console.log(productId, quantityToDecrease);
+
+        await shopprod1uctcollection.updateOne(
+          { _id: new ObjectId(productId) },
+          {
+            $inc: {
+              availavle: -quantityToDecrease,
+            },
+          }
+        );
+      }
+
       sendsucessemail(
         {
           subject: `Order & Payment Sucessfully !!!`,
@@ -1029,6 +1094,25 @@ async function run() {
       const orderdata = await shopordercollection.findOne({
         transiction_id: paymentinfo.transiction_id,
       });
+
+      for (const productInfo of orderdata?.productinfo) {
+        const productId = productInfo._id;
+        const quantityToDecrease = productInfo.quentuty;
+        console.log(productId, quantityToDecrease);
+        await shopprod1uctcollection.updateOne(
+          {
+            category_id: productInfo?.category_id,
+            category_name: productInfo?.category_name,
+            product_id: productInfo?.product_id,
+          },
+          {
+            $inc: {
+              availavle: -quantityToDecrease,
+            },
+          }
+        );
+      }
+
       sendsucessemail(
         {
           subject: `Order & Payment Sucessfully !!!`,
@@ -1519,12 +1603,11 @@ async function run() {
         const reset = req.query.reset;
         const today = new Date();
         const fiveDaysAgo = new Date(today);
+        const status = req.query.status;
         fiveDaysAgo.setDate(today.getDate() - orderDate);
         console.log(orderDate);
         const startDate = req.query.startDate;
         const endDate = req.query.endDate;
-        console.log(startDate);
-        console.log("end", endDate);
         let query = {};
         if (reset === "true") {
           query = {};
@@ -1610,12 +1693,10 @@ async function run() {
         } else if (search && search.length > 1) {
           console.log(search);
           query = { $text: { $search: search } };
-        }
-        // else if (status) {
-        //   console.log(status);
-        //   query = { stock: status };
-        // }
-        else {
+        } else if (status && status.length > 1) {
+          console.log("else", status);
+          query = { status: status };
+        } else {
           query = {};
         }
         let product = await shopordercollection
