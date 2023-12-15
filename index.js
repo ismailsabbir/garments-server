@@ -364,6 +364,38 @@ async function run() {
       const result = await ordercollection.insertOne(request_info);
       res.send(request_info);
     });
+
+    setInterval(async () => {
+      try {
+        const oneHourAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+        const ordersToCancel = await ordercollection
+          .find({
+            order: "not paid",
+            status: "Pending",
+            createdAt: { $lte: oneHourAgo },
+          })
+          .toArray();
+        for (const order of ordersToCancel) {
+          console.log(order._id);
+          const result = await ordercollection.updateOne(
+            { _id: order._id },
+            { $set: { status: "canceled" } }
+          );
+
+          console.log(result);
+          await sendemail(
+            {
+              subject: `Order cancel`,
+              message: order,
+            },
+            order?.email
+          );
+        }
+      } catch (error) {
+        console.error("Automatic cancellation error:", error);
+      }
+    }, 5 * 60 * 1000);
+
     app.post("/shoporder", async (req, res) => {
       try {
         const request_info = req.body;
@@ -654,6 +686,7 @@ async function run() {
         $set: {
           order: "paid",
           transiction_id: paymentinfo.transiction_id,
+          status: "Processing",
         },
       };
       const result = await ordercollection.updateOne(
@@ -787,6 +820,7 @@ async function run() {
             order: "paid",
             transiction_id: transiction_id,
             paidAt: paydate,
+            status: "Processing",
           },
         }
       );
@@ -851,6 +885,7 @@ async function run() {
             order: "paid",
             transiction_id: transiction_id,
             paidAt: paydate,
+            status: "Processing",
           },
         }
       );
@@ -941,6 +976,7 @@ async function run() {
             order: "paid",
             transiction_id: transiction_id,
             paidAt: paydate,
+            status: "Processing",
           },
         }
       );
@@ -1037,6 +1073,7 @@ async function run() {
         $set: {
           order: "paid",
           transiction_id: paymentinfo.transiction_id,
+          status: "Processing",
         },
       };
 
@@ -1084,6 +1121,7 @@ async function run() {
         $set: {
           order: "paid",
           transiction_id: paymentinfo.transiction_id,
+          status: "Processing",
         },
       };
       const result = await shopordercollection.updateOne(
