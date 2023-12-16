@@ -507,6 +507,36 @@ async function run() {
       res.send(result);
     });
 
+    app.put(`/update_customized_order_status/:id`, async (req, res) => {
+      const orderid = req.params.id;
+      const orderinfo = req.body;
+      const status = req.query.status;
+      console.log(status);
+      const options = { upsert: true };
+      const filter = { _id: new ObjectId(orderid) };
+      const updateorder = {
+        $set: {
+          status: status,
+        },
+      };
+      const result = await ordercollection.updateOne(
+        filter,
+        updateorder,
+        options
+      );
+      console.log(result);
+      if (result?.modifiedCount >= 1) {
+        sendemail(
+          {
+            subject: `Order is ${status} `,
+            message: orderinfo,
+          },
+          orderinfo?.email
+        );
+      }
+      res.send(result);
+    });
+
     app.post("/cartorder", async (req, res) => {
       const request_info = req.body;
       const result = await cartordercollection.insertOne(request_info);
@@ -1780,31 +1810,150 @@ async function run() {
 
       res.send({ count, product });
     });
-    app.get("/allcustomizedorders", verifyjwt, async (req, res) => {
-      const page = req.query.page;
-      const size = parseInt(req.query.size);
-      const search = parseInt(req.query.search);
-      const decoded = req.decoded;
-      if (decoded.email !== req.query.email) {
-        return res.status(403).send({ message: "forbidden access" });
-      }
-      let Query = {};
-      let product = await ordercollection
-        .find(Query)
-        .skip(page * size)
-        .limit(size)
-        .toArray();
-      // const emailproduct = await ordercollection.find(Query).toArray();
-      let count = await ordercollection.estimatedDocumentCount();
-      // let count = emailproduct?.length;
-      if (search) {
-        const idproduct = product.find((order) => order?.orderid === search);
-        product = [idproduct];
-        count = product.length;
-      }
+    // app.get("/allcustomizedorders", verifyjwt, async (req, res) => {
+    //   const page = req.query.page;
+    //   const size = parseInt(req.query.size);
+    //   const search = parseInt(req.query.search);
+    //   const decoded = req.decoded;
+    //   if (decoded.email !== req.query.email) {
+    //     return res.status(403).send({ message: "forbidden access" });
+    //   }
+    //   let Query = {};
+    //   let product = await ordercollection
+    //     .find(Query)
+    //     .skip(page * size)
+    //     .limit(size)
+    //     .toArray();
+    //   // const emailproduct = await ordercollection.find(Query).toArray();
+    //   let count = await ordercollection.estimatedDocumentCount();
+    //   // let count = emailproduct?.length;
+    //   if (search) {
+    //     const idproduct = product.find((order) => order?.orderid === search);
+    //     product = [idproduct];
+    //     count = product.length;
+    //   }
 
-      res.send({ count, product });
+    //   res.send({ count, product });
+    // });
+
+    app.get("/allcustomizedorders", verifyjwt, async (req, res) => {
+      try {
+        const page = req.query.page;
+        const size = parseInt(req.query.size);
+        const search = req.query.search;
+        console.log(search);
+        const orderDate = parseInt(req.query.orderDate);
+        const reset = req.query.reset;
+        const today = new Date();
+        const fiveDaysAgo = new Date(today);
+        const status = req.query.status;
+        fiveDaysAgo.setDate(today.getDate() - orderDate);
+        console.log(orderDate);
+        const startDate = req.query.startDate;
+        const endDate = req.query.endDate;
+        let query = {};
+        if (reset === "true") {
+          query = {};
+        } else if (
+          startDate &&
+          endDate &&
+          startDate.trim() !== "" &&
+          endDate.trim() !== ""
+        ) {
+          const startDateParts = startDate.split("-");
+          const startDay = parseInt(startDateParts[2]);
+          const startMonth = parseInt(startDateParts[1]);
+          const startYear = parseInt(startDateParts[0]);
+          const endDateParts = endDate.split("-");
+          const endDay = parseInt(endDateParts[2]);
+          const endMonth = parseInt(endDateParts[1]);
+          const endYear = parseInt(endDateParts[0]);
+          query = {
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    {
+                      $dateFromString: {
+                        dateString: "$order_date",
+                        format: "%d/%m/%Y",
+                      },
+                    },
+                    new Date(`${startYear}-${startMonth}-${startDay}`),
+                  ],
+                },
+                {
+                  $lte: [
+                    {
+                      $dateFromString: {
+                        dateString: "$order_date",
+                        format: "%d/%m/%Y",
+                      },
+                    },
+                    new Date(`${endYear}-${endMonth}-${endDay}`),
+                  ],
+                },
+              ],
+            },
+          };
+        } else if (orderDate) {
+          const fiveDaysAgo = new Date(today);
+          fiveDaysAgo.setDate(today.getDate() - parseInt(orderDate));
+          const startDay = fiveDaysAgo.getDate();
+          const startMonth = fiveDaysAgo.getMonth() + 1;
+          const startYear = fiveDaysAgo.getFullYear();
+          const endDay = today.getDate();
+          const endMonth = today.getMonth() + 1;
+          const endYear = today.getFullYear();
+          query = {
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    {
+                      $dateFromString: {
+                        dateString: "$order_date",
+                        format: "%d/%m/%Y",
+                      },
+                    },
+                    new Date(`${startYear}-${startMonth}-${startDay}`),
+                  ],
+                },
+                {
+                  $lte: [
+                    {
+                      $dateFromString: {
+                        dateString: "$order_date",
+                        format: "%d/%m/%Y",
+                      },
+                    },
+                    new Date(`${endYear}-${endMonth}-${endDay}`),
+                  ],
+                },
+              ],
+            },
+          };
+        } else if (search && search.length > 1) {
+          console.log(search);
+          query = { $text: { $search: search } };
+        } else if (status && status.length > 1) {
+          console.log("else", status);
+          query = { status: status };
+        } else {
+          query = {};
+        }
+        let product = await ordercollection
+          .find(query)
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+        const count = await ordercollection.countDocuments(query);
+        res.send({ count, product });
+      } catch (error) {
+        console.log(error);
+      }
     });
+
     app.get("/idodrders", verifyjwt, async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
@@ -1974,7 +2123,6 @@ async function run() {
       const page = req.query.page;
       const size = parseInt(req.query.size);
       const searchvalue = req.query.search;
-      console.log(searchvalue);
       let query = {};
       if (searchvalue.length) {
         query = {
@@ -1983,13 +2131,11 @@ async function run() {
           },
         };
       }
-      // const product = await staffcollection.find(query).toArray();
       let result = await staffcollection
         .find(query)
         .skip(page * size)
         .limit(size)
         .toArray();
-      // const count = product?.length;
       const count = await staffcollection.countDocuments(query);
       console.log(count);
       res.send({ result, count });
@@ -2038,6 +2184,22 @@ async function run() {
       res.send(result);
       console.log(result);
     });
+    app.post("/employee/login", async (req, res) => {
+      try {
+        const { email, password } = req.body;
+        const employee = await staffcollection.findOne({ email, password });
+        console.log(employee);
+        if (employee) {
+          res.status(200).json({ message: "Login successful", employee });
+        } else {
+          res.status(401).json({ error: "Invalid credentials" });
+        }
+      } catch (error) {
+        console.error("Error logging in:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
     app.put("/edit_staff/:id", async (req, res) => {
       const staffinfo = req.body;
 
@@ -2432,6 +2594,35 @@ async function run() {
       };
       const user = await staffcollection.findOne(query);
       res.send({ isAdmin: user?.role === "admin" });
+    });
+    app.get(`/staff/employee/:email`, async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        email: email,
+      };
+      const user = await staffcollection.findOne(query);
+      res.send({ isEmployee: user?.isEmployee });
+    });
+    app.get("/staff/check", async (req, res) => {
+      const email = req.query.email;
+      const password = req.query.password;
+      console.log(email, password);
+      const query = {
+        email: email,
+        password: password,
+      };
+      const staff = await staffcollection.findOne(query);
+      console.log(staff);
+      if (staff) {
+        res.send({
+          staff,
+          isStaff: true,
+        });
+      } else {
+        res.send({
+          isStaff: false,
+        });
+      }
     });
 
     app.get("/", (req, res) => {
