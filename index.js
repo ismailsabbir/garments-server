@@ -1,8 +1,10 @@
 const express = require("express");
+const { format } = require("date-fns");
 const natural = require("natural");
 const TfIdf = natural.TfIdf;
 var jwt = require("jsonwebtoken");
 const cors = require("cors");
+const moment = require("moment");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
@@ -10,6 +12,7 @@ const nodemailer = require("nodemailer");
 const stripe = require("stripe")(process.env.SECRET_KEY);
 const SSLCommerzPayment = require("sslcommerz-lts");
 const { MongoClient, ObjectId, Admin } = require("mongodb");
+
 const store_id = process.env.STORE_ID;
 const store_passwd = process.env.STORE_PASSWORD;
 const is_live = false;
@@ -22,6 +25,7 @@ const client = new MongoClient(uri);
 
 function verifyjwt(req, res, next) {
   const jwttokens = req.headers.authorization;
+
   if (!jwttokens) {
     return res.status(401).send({ message: "unautorized access" });
   }
@@ -195,6 +199,9 @@ async function run() {
     const staffcollection = client
       .db("garmentsinformation")
       .collection("staff-info");
+    const attendancellection = client
+      .db("garmentsinformation")
+      .collection("Attendance");
 
     const products = await shopprod1uctcollection.find({}).toArray();
     products.forEach((product) => {
@@ -207,6 +214,17 @@ async function run() {
       };
       const user = await staffcollection.findOne(query);
       if (user?.role !== "admin") {
+        return res.status(403).send({ message: "farbidden access" });
+      }
+      next();
+    };
+    const verifyEmployee = async (req, res, next) => {
+      const decodedemail = req.decoded.email;
+      const query = {
+        email: decodedemail,
+      };
+      const user = await staffcollection.findOne(query);
+      if (user?.isEmployee !== true) {
         return res.status(403).send({ message: "farbidden access" });
       }
       next();
@@ -2177,13 +2195,54 @@ async function run() {
       res.send({ result, count });
     });
 
+    // app.post("/addstaff", async (req, res) => {
+    //   const staffinfo = req.body;
+    //   const prefix = "E-";
+    //   const min = 10000;
+    //   const max = 99999;
+    //   const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    //   const employee_id = `${prefix}${randomNum}`;
+    //   const info = { ...staffinfo, employee_id };
+    //   const result = await staffcollection.insertOne(info);
+    //   res.send(result);
+    //   console.log(result);
+    // });
+
     app.post("/addstaff", async (req, res) => {
-      const staffinfo = req.body;
-      console.log(staffinfo);
-      const result = await staffcollection.insertOne(staffinfo);
-      res.send(result);
-      console.log(result);
+      try {
+        const staffinfo = req.body;
+
+        // Find the last assigned employee ID from the database
+        const lastEmployee = await staffcollection.findOne(
+          {},
+          { sort: { _id: -1 } }
+        );
+
+        // Extract the last assigned employee number
+        let lastEmployeeNumber = 0;
+        if (lastEmployee && lastEmployee.employee_id) {
+          const lastEmployeeParts = lastEmployee.employee_id.split("-");
+          lastEmployeeNumber = parseInt(lastEmployeeParts[1]);
+        }
+
+        // Increment the employee number for the new employee
+        const newEmployeeNumber = lastEmployeeNumber + 1;
+
+        // Generate the new employee ID
+        const employee_id = `E-${String(newEmployeeNumber).padStart(5, "0")}`;
+
+        // Add the new employee to the collection
+        const info = { ...staffinfo, employee_id };
+        const result = await staffcollection.insertOne(info);
+
+        res.send(result);
+        console.log(result);
+      } catch (error) {
+        console.error("Error adding staff:", error);
+        res.status(500).send("Error adding staff");
+      }
     });
+
     app.post("/employee/login", async (req, res) => {
       try {
         const { email, password } = req.body;
@@ -2603,6 +2662,22 @@ async function run() {
       const user = await staffcollection.findOne(query);
       res.send({ isEmployee: user?.isEmployee });
     });
+    app.get(`/staff/employee/manager/:email`, async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        email: email,
+      };
+      const user = await staffcollection.findOne(query);
+      res.send({ isManager: user?.role === "Manager" });
+    });
+    app.get("/single/employee", verifyjwt, verifyEmployee, async (req, res) => {
+      const decodedemail = req.decoded.email;
+      console.log(decodedemail);
+      const email = req.query.email;
+      console.log(email);
+      const result = await staffcollection.findOne({ email });
+      res.send(result);
+    });
     app.get("/staff/check", async (req, res) => {
       const email = req.query.email;
       const password = req.query.password;
@@ -2622,6 +2697,172 @@ async function run() {
         res.send({
           isStaff: false,
         });
+      }
+    });
+    app.get("/staff_id", async (req, res) => {
+      try {
+        const email = req.query.email;
+        console.log(email);
+        const result = await staffcollection.findOne({ email });
+        res.send(result);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    // app.post("/addAttendance", async (req, res) => {
+    //   try {
+    //     const staffinfo = req.body;
+    //     if (!isValidEmployeeId(staffinfo.employee_id)) {
+    //       return res.status(400).json({ error: "Invalid Employee ID" });
+    //     }
+    //     const currentTime = moment();
+    //     const before8AM = moment("08:00", "HH:mm");
+    //     const after5PM = moment("17:00", "HH:mm");
+
+    //     if (
+    //       currentTime.isBefore(before8AM) ||
+    //       currentTime.isSameOrAfter(after5PM)
+    //     ) {
+    //       return res.status(400).json({
+    //         error: "Attendance can only be given between 8 AM and 5 PM",
+    //       });
+    //     }
+    //     staffinfo.attendance_date = currentTime.format("DD/MM/YY");
+    //     staffinfo.attendance_time = currentTime.format("hh:mm A");
+    //     const result = await attendancellection.insertOne(staffinfo);
+    //     res.status(200).json({ success: true, message: "Attendance added" });
+    //   } catch (error) {
+    //     console.error(error);
+    //     res.status(500).json({ error: "Internal Server Error" });
+    //   }
+    // });
+
+    // async function isValidEmployeeId(employeeId) {
+    //   try {
+    //     const regex = /^E-\d{5}$/;
+    //     if (!regex.test(employeeId)) {
+    //       return false;
+    //     }
+    //     const employee = await staffcollection.findOne({
+    //       employee_id: employeeId,
+    //     });
+    //     return !!employee;
+    //   } finally {
+    //     await client.close();
+    //   }
+    // }
+
+    app.post("/addAttendance", async (req, res) => {
+      try {
+        const staffinfo = req.body;
+        const isvalidatedemployee = await staffcollection.findOne({
+          employee_id: staffinfo.employee_id,
+        });
+        if (!isvalidatedemployee) {
+          return res.status(400).json({ error: "Invalid Employee ID" });
+        }
+        const currentTime = moment();
+        const before8AM = moment("8:00", "HH:mm");
+        const after5PM = moment("17:00", "HH:mm");
+        if (
+          !(
+            currentTime.isBefore(before8AM) ||
+            currentTime.isSameOrAfter(after5PM)
+          )
+        ) {
+          return res.status(400).json({
+            error: "Attendance can only be given before 8 AM or after 5 PM",
+          });
+        }
+
+        const existingAttendance = await attendancellection.findOne({
+          employee_id: staffinfo.employee_id,
+          attendance_date: currentTime.format("DD/MM/YY"),
+        });
+        console.log("existing=  ", existingAttendance);
+
+        if (
+          (currentTime.isBefore(before8AM) &&
+            existingAttendance?.status_in === "present") ||
+          (currentTime.isSameOrAfter(after5PM) &&
+            // !existingAttendance === null &&
+            existingAttendance?.status_out === "present")
+        ) {
+          console.log("adddddd");
+          return res.status(400).json({
+            error: "Attendance already given for the specified time period",
+          });
+        }
+
+        if (currentTime.isBefore(before8AM)) {
+          staffinfo.status_in = "present";
+        } else if (currentTime.isSameOrAfter(after5PM)) {
+          staffinfo.status_out = "present";
+        }
+
+        staffinfo.attendance_date = currentTime.format("DD/MM/YY");
+        staffinfo.attendance_time = currentTime.format("hh:mm A");
+        console.log(staffinfo);
+        const result = await attendancellection.insertOne(staffinfo);
+        res.status(200).json({ success: true, message: "Attendance added" });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+    async function isValidEmployeeId(employeeId) {
+      try {
+        // const regex = /^E-\d{5}$/;
+        // if (!regex.test(employeeId)) {
+        //   return false;
+        // }
+        console.log(employeeId);
+        const employee = await staffcollection.findOne({
+          employee_id: employeeId,
+        });
+        if (employee) {
+          return employee;
+        }
+        console.log("employee is== ", employee);
+        // return !!employee;
+      } catch (err) {
+        console.error("Error in isValidEmployeeId:", err);
+        throw err; // Rethrow the error for better error handling
+      }
+    }
+
+    app.post("/triggerAttendanceCheck", async (req, res) => {
+      try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const formattedToday = format(today, "dd/MM/yy");
+        const employees = await staffcollection
+          .find({ isEmployee: true })
+          .toArray();
+        for (const employee of employees) {
+          console.log(employee?.employee_id, today);
+          const attendance = await attendancellection.findOne({
+            employee_id: employee.employee_id,
+            attendance_date: formattedToday,
+          });
+          console.log(attendance);
+          if (!attendance) {
+            const currentTime = new Date();
+            const attendanceTime = format(currentTime, "hh:mm a");
+            await attendancellection.insertOne({
+              employee_id: employee.employee_id,
+              attendance_date: formattedToday,
+              attendance_time: attendanceTime,
+              status_in: "absence",
+              status_out: "absence",
+            });
+          }
+        }
+        res.send({ sucess: "sucess" });
+      } catch (error) {
+        console.error("Error during manual Attendance Check:", error);
+        res.status(500).send("Error during manual Attendance Check.");
       }
     });
 
