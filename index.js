@@ -1,5 +1,12 @@
 const express = require("express");
-const { format } = require("date-fns");
+const {
+  format,
+  startOfMonth,
+  endOfMonth,
+  isFriday,
+  isSameDay,
+  parse,
+} = require("date-fns");
 const natural = require("natural");
 const TfIdf = natural.TfIdf;
 var jwt = require("jsonwebtoken");
@@ -2753,18 +2760,125 @@ async function run() {
     //   }
     // }
 
+    // app.post("/addAttendance", async (req, res) => {
+    //   try {
+    //     const staffinfo1 = req.body;
+    //     const isvalidatedemployee = await staffcollection.findOne({
+    //       employee_id: staffinfo1.employee_id,
+    //     });
+    //     if (!isvalidatedemployee) {
+    //       return res.status(400).json({ error: "Invalid Employee ID" });
+    //     }
+    //     const photo = isvalidatedemployee?.photo;
+    //     const name = isvalidatedemployee?.name;
+    //     const staffinfo = {
+    //       ...staffinfo1,
+    //       photo,
+    //       name,
+    //     };
+    //     const currentTime = moment();
+    //     // const before8AM = moment("8:00", "HH:mm");
+    //     // const after5PM = moment("17:00", "HH:mm");
+    //     const before8AM = moment("8:00", "HH:mm");
+    //     const after5PM = moment("11:00", "HH:mm");
+    //     if (
+    //       !(
+    //         currentTime.isBefore(before8AM) ||
+    //         //currentTime.isBefore(after5PM) )
+    //         currentTime.isSameOrAfter(after5PM)
+    //       )
+    //     ) {
+    //       return res.status(400).json({
+    //         error: "Attendance can only be given before 8 AM or after 5 PM",
+    //       });
+    //     }
+
+    //     const existingAttendance = await attendancellection.findOne({
+    //       employee_id: staffinfo.employee_id,
+    //       attendance_date: currentTime.format("DD/MM/YY"),
+    //     });
+
+    //     if (
+    //       (currentTime.isBefore(before8AM) &&
+    //         existingAttendance?.status_in === "present") ||
+    //       (currentTime.isSameOrAfter(after5PM) &&
+    //         existingAttendance?.status_out === "present")
+    //     ) {
+    //       return res.status(400).json({
+    //         error: "Attendance already given for the specified time period",
+    //       });
+    //     }
+    //     if (currentTime.isBefore(before8AM)) {
+    //       console.log("before 8am");
+    //       staffinfo.status_in = "present";
+    //       staffinfo.attendance_in_time = currentTime.format("hh:mm A");
+    //     } else if (currentTime.isSameOrAfter(after5PM)) {
+    //       if (existingAttendance?.status_in === "present") {
+    //         console.log("update");
+    //         const updateOperation = {
+    //           $set: {
+    //             status_out: "present",
+    //             attendance_out_time: currentTime.format("hh:mm A"),
+    //           },
+    //         };
+    //         const result = await attendancellection.updateOne(
+    //           {
+    //             employee_id: staffinfo.employee_id,
+    //             attendance_date: currentTime.format("DD/MM/YY"),
+    //           },
+    //           updateOperation
+    //         );
+    //         res.send(result);
+    //       } else {
+    //         staffinfo.status_out = "present";
+    //         staffinfo.attendance_out_time = currentTime.format("hh:mm A");
+    //       }
+
+    //       console.log("after 5PM");
+    //       staffinfo.status_out = "present";
+    //       staffinfo.attendance_out_time = currentTime.format("hh:mm A");
+    //     }
+    //     // else if (currentTime.isBefore(after5PM)) {
+    //     //   console.log("after 5PM");
+    //     //   staffinfo.status_out = "present";
+    //     //   staffinfo.attendance_out_time = currentTime.format("hh:mm A");
+    //     // }
+    //     staffinfo.attendance_date = currentTime.format("DD/MM/YY");
+    //     // staffinfo.attendance_time = currentTime.format("hh:mm A");
+    //     console.log(staffinfo);
+    //     const result = await attendancellection.insertOne(staffinfo);
+    //     res.status(200).json({ success: true, message: "Attendance added" });
+    //   } catch (error) {
+    //     console.error(error);
+    //     res.status(500).json({ error: "Internal Server Error" });
+    //   }
+    // });
+
     app.post("/addAttendance", async (req, res) => {
       try {
-        const staffinfo = req.body;
+        const staffinfo1 = req.body;
         const isvalidatedemployee = await staffcollection.findOne({
-          employee_id: staffinfo.employee_id,
+          employee_id: staffinfo1.employee_id,
         });
+
         if (!isvalidatedemployee) {
           return res.status(400).json({ error: "Invalid Employee ID" });
         }
+
+        const photo = isvalidatedemployee?.photo;
+        const name = isvalidatedemployee?.name;
+        const staffinfo = {
+          ...staffinfo1,
+          photo,
+          name,
+        };
+
         const currentTime = moment();
         const before8AM = moment("8:00", "HH:mm");
         const after5PM = moment("17:00", "HH:mm");
+        // const before8AM = moment("8:00", "HH:mm");
+        // const after5PM = moment("12:00", "HH:mm");
+
         if (
           !(
             currentTime.isBefore(before8AM) ||
@@ -2780,29 +2894,72 @@ async function run() {
           employee_id: staffinfo.employee_id,
           attendance_date: currentTime.format("DD/MM/YY"),
         });
-        console.log("existing=  ", existingAttendance);
 
         if (
           (currentTime.isBefore(before8AM) &&
             existingAttendance?.status_in === "present") ||
           (currentTime.isSameOrAfter(after5PM) &&
-            // !existingAttendance === null &&
             existingAttendance?.status_out === "present")
         ) {
-          console.log("adddddd");
           return res.status(400).json({
             error: "Attendance already given for the specified time period",
           });
         }
 
         if (currentTime.isBefore(before8AM)) {
+          console.log("before 8am");
+
           staffinfo.status_in = "present";
+          staffinfo.status_out = "absence";
+
+          staffinfo.attendance_in_time = currentTime.format("hh:mm A");
+          staffinfo.attendance_out_time = "13:00 PM";
+          staffinfo.totalDuration = calculateTotalTime(
+            staffinfo.attendance_in_time,
+            staffinfo.attendance_out_time
+          );
         } else if (currentTime.isSameOrAfter(after5PM)) {
+          if (existingAttendance?.status_in === "present") {
+            console.log("update");
+
+            const totalDuration = calculateTotalTime(
+              existingAttendance?.attendance_in_time,
+              currentTime.format("hh:mm A")
+            );
+            const updateOperation = {
+              $set: {
+                status_out: "present",
+                attendance_out_time: currentTime.format("hh:mm A"),
+                totalDuration,
+              },
+            };
+            const result = await attendancellection.updateOne(
+              {
+                employee_id: staffinfo.employee_id,
+                attendance_date: currentTime.format("DD/MM/YY"),
+              },
+              updateOperation
+            );
+            return res
+              .status(200)
+              .json({ success: true, message: "Attendance updated" });
+          } else {
+            staffinfo.status_out = "present";
+            staffinfo.status_in = "absence";
+            staffinfo.attendance_out_time = currentTime.format("hh:mm A");
+            staffinfo.attendance_in_time = "13:00 AM";
+            staffinfo.totalDuration = calculateTotalTime(
+              staffinfo.attendance_in_time,
+              staffinfo.attendance_out_time
+            );
+          }
+
+          console.log("after 5PM");
           staffinfo.status_out = "present";
+          staffinfo.attendance_out_time = currentTime.format("hh:mm A");
         }
 
         staffinfo.attendance_date = currentTime.format("DD/MM/YY");
-        staffinfo.attendance_time = currentTime.format("hh:mm A");
         console.log(staffinfo);
         const result = await attendancellection.insertOne(staffinfo);
         res.status(200).json({ success: true, message: "Attendance added" });
@@ -2811,12 +2968,38 @@ async function run() {
         res.status(500).json({ error: "Internal Server Error" });
       }
     });
+    function calculateTotalTime(attendanceInTime, attendanceOutTime) {
+      if (!attendanceInTime && !attendanceOutTime) {
+        console.log("Both attendance times are missing");
+        return "00:00";
+      }
+      if (!attendanceInTime) {
+        console.log("AttendanceInTime is missing, assuming 12:00 PM");
+        attendanceInTime = "13:00 PM";
+      }
+      if (!attendanceOutTime) {
+        console.log("AttendanceOutTime is missing, assuming 12:00 PM");
+        attendanceOutTime = "13:00 PM";
+      }
+      console.log(
+        "AttendanceInTime:",
+        attendanceInTime,
+        "AttendanceOutTime:",
+        attendanceOutTime
+      );
+      const format = "hh:mm A";
+      const inTime = moment(attendanceInTime, format);
+      const outTime = moment(attendanceOutTime, format);
+      const diffMilliseconds = outTime.diff(inTime);
+      const duration = moment.duration(diffMilliseconds);
+      const totalDuration = moment
+        .utc(duration.asMilliseconds())
+        .format("HH:mm");
+      return totalDuration;
+    }
+
     async function isValidEmployeeId(employeeId) {
       try {
-        // const regex = /^E-\d{5}$/;
-        // if (!regex.test(employeeId)) {
-        //   return false;
-        // }
         console.log(employeeId);
         const employee = await staffcollection.findOne({
           employee_id: employeeId,
@@ -2825,10 +3008,9 @@ async function run() {
           return employee;
         }
         console.log("employee is== ", employee);
-        // return !!employee;
       } catch (err) {
         console.error("Error in isValidEmployeeId:", err);
-        throw err; // Rethrow the error for better error handling
+        throw err;
       }
     }
 
@@ -2851,11 +3033,16 @@ async function run() {
             const currentTime = new Date();
             const attendanceTime = format(currentTime, "hh:mm a");
             await attendancellection.insertOne({
+              photo: employee?.photo,
+              name: employee?.name,
               employee_id: employee.employee_id,
               attendance_date: formattedToday,
               attendance_time: attendanceTime,
               status_in: "absence",
               status_out: "absence",
+              attendance_in_time: "00:00 AM",
+              attendance_out_time: "00:00 PM",
+              totalDuration: "00:00",
             });
           }
         }
@@ -2865,6 +3052,216 @@ async function run() {
         res.status(500).send("Error during manual Attendance Check.");
       }
     });
+    app.get("/todayAttendance", async (req, res) => {
+      try {
+        const page = req.query.page;
+        const size = parseInt(req.query.size);
+        // const search = req.query.search;
+        // const reset = req.query.reset;
+        // const status = req.query.status;
+        // const employeeId = req.query.employeeId;
+
+        console.log(page, size);
+        const today = new Date();
+        const formattedToday = format(today, "dd/MM/yy");
+        let query = { attendance_date: formattedToday };
+        const attendance = await attendancellection
+          .find(query)
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+        const count = await attendancellection.countDocuments(query);
+        res.send({ count, attendance });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    function parseCustomDate(dateString) {
+      const [day, month, year] = dateString.split("/");
+      const fullYear = parseInt("20" + year, 10);
+      const parsedDate = new Date(Date.UTC(fullYear, month - 1, day));
+      return parsedDate;
+    }
+    app.get("/attendanceSheet", async (req, res) => {
+      try {
+        const page = req.query.page;
+        const pageSize = parseInt(req.query.size);
+        console.log("Generating Attendance Sheet");
+        const currentMonthStart = startOfMonth(new Date());
+        const currentMonthEnd = endOfMonth(new Date());
+        const currentDate = new Date();
+        const firstDayOfMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          1
+        );
+        const lastDayOfMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0
+        );
+        const formattedFirstDay = formatDate(firstDayOfMonth);
+        const formattedLastDay = formatDate(lastDayOfMonth);
+        const employees = await staffcollection
+          .find({ isEmployee: true })
+          .skip(page * pageSize)
+          .limit(pageSize)
+          .toArray();
+        const count = await staffcollection.countDocuments({
+          isEmployee: true,
+        });
+        const attendanceSheet = [];
+        for (const employee of employees) {
+          const attendanceRecords = await attendancellection
+            .find({
+              employee_id: employee.employee_id,
+              attendance_date: {
+                $gte: formattedFirstDay,
+                $lte: formattedLastDay,
+              },
+            })
+            .toArray();
+          console.log(attendanceRecords);
+          const formattedAttendance = [];
+          for (
+            let day = 1;
+            day <= endOfMonth(currentMonthStart).getDate();
+            day++
+          ) {
+            const currentDate = new Date(currentMonthStart);
+            currentDate.setDate(day);
+            const attendanceRecord = attendanceRecords.find((record) => {
+              const recordDate = parseCustomDate(record.attendance_date);
+              return isSameDay(recordDate, currentDate);
+            });
+            let symbol = "P";
+            if (!attendanceRecord) {
+              symbol = "A";
+            }
+            if (isFriday(currentDate)) {
+              symbol = "*";
+            }
+            formattedAttendance.push({
+              date: format(currentDate, "dd/MM/yy"),
+              symbol,
+            });
+          }
+          const employeeAttendanceSheet = {
+            employeeId: employee.employee_id,
+            name: `${employee.name} ${employee.lastname}`,
+            photo: employee?.photo,
+            attendance: formattedAttendance,
+          };
+          attendanceSheet.push(employeeAttendanceSheet);
+        }
+        console.log("Attendance Sheet generated successfully.");
+        res.json({
+          attendanceSheet,
+          count,
+        });
+      } catch (error) {
+        console.error("Error generating Attendance Sheet:", error);
+        res.status(500).send("Error generating Attendance Sheet.");
+      }
+    });
+    app.get(`/specificAttendance`, async (req, res) => {
+      try {
+        const employee_id = req.query.employee_id;
+        const currentDate = new Date();
+        const firstDayOfMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          1
+        );
+        const lastDayOfMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0
+        );
+        const formattedFirstDay = formatDate(firstDayOfMonth);
+        const formattedLastDay = formatDate(lastDayOfMonth);
+        const attendanceThisMonth = await attendancellection
+          .find({
+            employee_id: employee_id,
+            attendance_date: {
+              $gte: formattedFirstDay,
+              $lte: formattedLastDay,
+            },
+          })
+          .toArray();
+
+        const employeeinfo = await staffcollection.findOne({
+          employee_id: employee_id,
+        });
+
+        const averageInTime = calculateAverageTime(
+          attendanceThisMonth.map((record) => record.attendance_in_time)
+        );
+        const averageOutTime = calculateAverageTime(
+          attendanceThisMonth.map((record) => record.attendance_out_time)
+        );
+        const averageWorkingTime =
+          calculateAverageWorkingTime(attendanceThisMonth);
+        console.log(averageInTime, averageOutTime, averageWorkingTime);
+        res.json({
+          attendanceThisMonth,
+          employeeinfo,
+          averageInTime,
+          averageOutTime,
+          averageWorkingTime,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+    const calculateAverageTime = (timeArray) => {
+      if (!timeArray || timeArray.length === 0) {
+        return "N/A";
+      }
+      const moments = timeArray.map((timeString) =>
+        moment(timeString, "hh:mm A")
+      );
+      const totalMinutes = moments.reduce(
+        (total, momentObj) =>
+          total + momentObj.hours() * 60 + momentObj.minutes(),
+        0
+      );
+      const averageMinutes = Math.round(totalMinutes / timeArray.length);
+      const hours = Math.floor(averageMinutes / 60);
+      const minutes = averageMinutes % 60;
+
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+        2,
+        "0"
+      )}`;
+    };
+    const calculateAverageWorkingTime = (attendanceRecords) => {
+      if (!attendanceRecords || attendanceRecords.length === 0) {
+        return "N/A";
+      }
+      const totalWorkingMinutes = attendanceRecords.reduce((total, record) => {
+        const [hours, minutes] = record.totalDuration.split(":").map(Number);
+        return total + hours * 60 + minutes;
+      }, 0);
+      const averageWorkingMinutes = Math.round(
+        totalWorkingMinutes / attendanceRecords.length
+      );
+      const hours = Math.floor(averageWorkingMinutes / 60);
+      const minutes = averageWorkingMinutes % 60;
+
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+        2,
+        "0"
+      )}`;
+    };
+
+    function formatDate(date) {
+      const day = ("0" + date.getDate()).slice(-2);
+      const month = ("0" + (date.getMonth() + 1)).slice(-2);
+      const year = (date.getFullYear() + "").slice(-2);
+      return `${day}/${month}/${year}`;
+    }
 
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
