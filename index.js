@@ -137,6 +137,52 @@ const sendsucessemail = (emaildata, emeil) => {
     }
   });
 };
+const sendEmployeemail = (emaildata, emeil) => {
+  console.log(emaildata);
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS,
+    },
+  });
+  const imageUrl =
+    "https://i.ibb.co/KqGcS3M/385565151-1096613294836586-7043829326437074719-n.png";
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: emeil,
+    subject: emaildata?.subject,
+    html: `
+    <html>
+    <head>
+      <title> ${emaildata?.subject}</title>
+      <link rel="stylesheet" type="text/css" href="/design.css">
+    </head>
+    <body>
+      <div style="background-color: #F4F7F8; padding: 10px; text-align: center; font-size: 15px;">
+      <img src="${imageUrl}" alt="Your Image" style="max-width: 100%;width: 200px; height: 100px;margin-bottom: 20px;" />
+        <p style="color: blue; font-size: 1.1rem; font-weight: 500;">Your ID: ${emaildata?.message.employee_id}</p>
+        <h5>Your ${emaildata?.subject}</h5>
+        <p>Salary Date:${emaildata.message.currentMonth}</p>
+        <p>Salary: ${emaildata.message.salary}</p>
+        <p>Transaction Id:${emaildata.message.tran_id}</p>
+        <p>Name: ${emaildata?.message?.name}</p>
+        <p>Mobile: ${emaildata?.message.phone}</p>
+        <p>Email: ${emaildata?.message.email}</p>
+      </div>
+    </body>
+  </html>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+};
 async function run() {
   await client.connect();
   try {
@@ -209,6 +255,9 @@ async function run() {
     const attendancellection = client
       .db("garmentsinformation")
       .collection("Attendance");
+    const salaryllection = client
+      .db("garmentsinformation")
+      .collection("salary");
 
     const products = await shopprod1uctcollection.find({}).toArray();
     products.forEach((product) => {
@@ -729,6 +778,7 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
     });
+
     app.put(`/payment/:id`, async (req, res) => {
       console.log("/payment/:id");
       console.log("bkash  ");
@@ -2268,9 +2318,8 @@ async function run() {
 
     app.put("/edit_staff/:id", async (req, res) => {
       const staffinfo = req.body;
-
+      console.log(staffinfo);
       const id = req.params.id;
-      console.log(staffinfo, id);
       const filter = {
         _id: new ObjectId(id),
       };
@@ -2287,6 +2336,8 @@ async function run() {
           password: staffinfo?.password,
           role: staffinfo?.role,
           join_date: staffinfo?.join_date,
+          salary: staffinfo?.salary,
+          cardId: staffinfo?.cardId,
         },
       };
       const result = await staffcollection.updateOne(filter, updatedoc, option);
@@ -3164,6 +3215,7 @@ async function run() {
         res.status(500).send("Error generating Attendance Sheet.");
       }
     });
+
     app.get(`/specificAttendance`, async (req, res) => {
       try {
         const employee_id = req.query.employee_id;
@@ -3180,15 +3232,41 @@ async function run() {
         );
         const formattedFirstDay = formatDate(firstDayOfMonth);
         const formattedLastDay = formatDate(lastDayOfMonth);
+        console.log(typeof formattedFirstDay, formattedLastDay);
         const attendanceThisMonth = await attendancellection
           .find({
             employee_id: employee_id,
             attendance_date: {
-              $gte: formattedFirstDay,
               $lte: formattedLastDay,
+              $gte: formattedFirstDay,
             },
           })
           .toArray();
+
+        // const attendanceThisMonth1 = await attendancellection
+        //   .aggregate([
+        //     {
+        //       $match: {
+        //         employee_id: employee_id,
+        //         attendance_date: {
+        //           $gte: {
+        //             $dateFromString: {
+        //               dateString: formattedFirstDay,
+        //               format: "%d/%m/%y",
+        //             },
+        //           },
+        //           $lte: {
+        //             $dateFromString: {
+        //               dateString: formattedLastDay,
+        //               format: "%d/%m/%y",
+        //             },
+        //           },
+        //         },
+        //       },
+        //     },
+        //   ])
+        //   .toArray();
+        // console.log(attendanceThisMonth1);
 
         const employeeinfo = await staffcollection.findOne({
           employee_id: employee_id,
@@ -3215,6 +3293,53 @@ async function run() {
         res.status(500).json({ error: "Internal Server Error" });
       }
     });
+
+    app.put("/edit_employee-attendance/:id", async (req, res) => {
+      try {
+        const attendanceinfo = req.body;
+        const id = req.params.id;
+        console.log(attendanceinfo, id);
+        const filter = {
+          _id: new ObjectId(id),
+        };
+        const options = {
+          upsert: false,
+        };
+        const updateDoc = {
+          $set: {
+            attendance_in_time: attendanceinfo?.attendance_in_time,
+            attendance_out_time: attendanceinfo?.attendance_out_time,
+            status_in: attendanceinfo?.status_in,
+            status_out: attendanceinfo?.status_out,
+          },
+        };
+        const result = await attendancellection.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        console.log(result);
+        if (result.matchedCount === 1) {
+          res.status(200).send(result);
+        } else if (result.upsertedCount === 1) {
+          res.status(201).send({ message: "Product created" });
+        } else {
+          res.status(404).send({ message: "Product not found" });
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+    app.delete(`/delete-employee-attendance/:id`, async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      console.log(req.body);
+      const query = { _id: new ObjectId(id) };
+      const result = await attendancellection.deleteOne(query);
+      res.send(result);
+    });
+
     const calculateAverageTime = (timeArray) => {
       if (!timeArray || timeArray.length === 0) {
         return "N/A";
@@ -3262,6 +3387,103 @@ async function run() {
       const year = (date.getFullYear() + "").slice(-2);
       return `${day}/${month}/${year}`;
     }
+
+    app.post("/employee-payment-intent", async (req, res) => {
+      const { salary, employee_id, email } = req.body;
+      console.log(salary, employee_id, email);
+      const currentMonth = new Date().toLocaleString("en-us", {
+        month: "long",
+      });
+      const currentTime = new Date().toLocaleTimeString();
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: salary,
+        currency: "bdt",
+        description: `Employee Salary Payment ${employee_id} - ${currentMonth} ${currentTime}`,
+      });
+      res.json({ clientSecret: paymentIntent.client_secret });
+    });
+    app.post("/make-payment", async (req, res) => {
+      const { amount, employeeId, email, employeeinfo } = req.body;
+      const randomDigit = Math.floor(Math.random() * 100000);
+      const payId = `#P${String(randomDigit).padStart(5, "0")}`;
+      try {
+        const employee = await staffcollection.findOne({
+          employee_id: employeeId,
+        });
+        if (!employee) {
+          return res.status(404).json({ error: "Employee not found" });
+        }
+        const currentMonth = new Date().toLocaleString("en-us", {
+          month: "long",
+        });
+
+        if (employee.isSalaryPaid) {
+          const lastPaymentDateStr = employee.paymentStatus.split(" - ")[1];
+          const lastPaymentMonth = lastPaymentDateStr.split(" ")[0];
+          if (lastPaymentMonth === currentMonth) {
+            console.log("alredy paid in currenn");
+            return res
+              .status(400)
+              .json({ error: "Salary already paid for the current month" });
+          }
+        }
+
+        const currentTime = new Date().toLocaleTimeString();
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amount,
+          currency: "bdt",
+          description: `Employee Salary Payment ${employeeId} - ${currentMonth} ${currentTime}`,
+        });
+        console.log(paymentIntent);
+        const options = { upsert: true };
+        const filter = { employee_id: employeeId };
+        const updateOrder = {
+          $set: {
+            isSalaryPaid: true,
+            paymentStatus: `Paid - ${currentMonth} ${currentTime}`,
+            tran_id: paymentIntent?.id,
+            payId: payId,
+          },
+        };
+
+        const result = await staffcollection.updateOne(
+          filter,
+          updateOrder,
+          options
+        );
+        const salaryinfo = {
+          isSalaryPaid: true,
+          employee_id: employeeId,
+          salary: amount,
+          paymentStatus: `Paid - ${currentMonth} ${currentTime}`,
+          tran_id: paymentIntent?.id,
+          payId: payId,
+        };
+        const salary = await salaryllection.insertOne(salaryinfo);
+        console.log(salary);
+
+        if (result && salary && paymentIntent?.client_secret) {
+          const orderdata = {
+            ...employeeinfo,
+            currentMonth,
+            tran_id: paymentIntent?.id,
+            payId: payId,
+          };
+          sendEmployeemail(
+            {
+              subject: `Salary add Sucessfully !!!`,
+              message: orderdata,
+            },
+            orderdata?.email
+          );
+        }
+        console.log(result, paymentIntent.client_secret);
+        res.json({ clientSecret: paymentIntent.client_secret });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ error: "Payment failed" });
+      }
+    });
 
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
