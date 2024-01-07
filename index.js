@@ -2828,6 +2828,27 @@ async function run() {
         });
       }
     });
+    app.get("/customer/check", async (req, res) => {
+      const email = req.query.email;
+      const password = req.query.password;
+      console.log(email, password);
+      const query = {
+        email: email,
+        password: password,
+      };
+      const user = await usercollection.findOne(query);
+
+      if (user) {
+        res.send({
+          user,
+          isPremium: true,
+        });
+      } else {
+        res.send({
+          isPremium: false,
+        });
+      }
+    });
     app.get("/staff_id", async (req, res) => {
       try {
         const email = req.query.email;
