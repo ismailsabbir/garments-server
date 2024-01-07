@@ -183,6 +183,51 @@ const sendEmployeemail = (emaildata, emeil) => {
     }
   });
 };
+const sendPremimCustomer = (emaildata, emeil) => {
+  console.log(emaildata);
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS,
+    },
+  });
+  const imageUrl =
+    "https://i.ibb.co/KqGcS3M/385565151-1096613294836586-7043829326437074719-n.png";
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: emeil,
+    subject: emaildata?.subject,
+    html: `
+    <html>
+    <head>
+      <title> ${emaildata?.subject}</title>
+      <link rel="stylesheet" type="text/css" href="/design.css">
+    </head>
+    <body>
+      <div style="background-color: #F4F7F8; padding: 10px; text-align: center; font-size: 15px;">
+      <img src="${imageUrl}" alt="Your Image" style="max-width: 100%;width: 200px; height: 100px;margin-bottom: 20px;" />
+        <h5>${emaildata?.subject}</h5>
+        <p>Created Date:${emaildata.message.created_date}</p>
+        <p>Name: ${emaildata.message.name}</p>
+        <p>Email:${emaildata.message.email}</p>
+        <p>password: ${emaildata?.message?.password}</p>
+        <p>Mobile: ${emaildata?.message.phone}</p>
+        <p>Role: ${emaildata?.message.role} Customer</p>
+      </div>
+    </body>
+  </html>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+};
 async function run() {
   await client.connect();
   try {
@@ -1285,11 +1330,11 @@ async function run() {
       const user = await usercollection.findOne(query);
       res.send(user);
     });
-    app.get("/allusers", async (req, res) => {
-      const query = {};
-      const users = await usercollection.find(query).toArray();
-      res.send(users);
-    });
+    // app.get("/allusers", async (req, res) => {
+    //   const query = {};
+    //   const users = await usercollection.find(query).toArray();
+    //   res.send(users);
+    // });
     app.get("/shopcategory", async (req, res) => {
       const query = {};
       const shopcategory = await shopcategorycollection.find(query).toArray();
@@ -2215,6 +2260,19 @@ async function run() {
       console.log(count);
       res.send({ result, count });
     });
+    app.get("/allusers", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const searchvalue = req.query.search;
+      const query = {};
+      const result = await usercollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = await usercollection.countDocuments(query);
+      res.send({ result, count });
+    });
     app.get("/single_staff", verifyjwt, verifyAdmin, async (req, res) => {
       const email = req.query.email;
       const page = req.query.page;
@@ -2268,30 +2326,19 @@ async function run() {
     app.post("/addstaff", async (req, res) => {
       try {
         const staffinfo = req.body;
-
-        // Find the last assigned employee ID from the database
         const lastEmployee = await staffcollection.findOne(
           {},
           { sort: { _id: -1 } }
         );
-
-        // Extract the last assigned employee number
         let lastEmployeeNumber = 0;
         if (lastEmployee && lastEmployee.employee_id) {
           const lastEmployeeParts = lastEmployee.employee_id.split("-");
           lastEmployeeNumber = parseInt(lastEmployeeParts[1]);
         }
-
-        // Increment the employee number for the new employee
         const newEmployeeNumber = lastEmployeeNumber + 1;
-
-        // Generate the new employee ID
         const employee_id = `E-${String(newEmployeeNumber).padStart(5, "0")}`;
-
-        // Add the new employee to the collection
         const info = { ...staffinfo, employee_id };
         const result = await staffcollection.insertOne(info);
-
         res.send(result);
         console.log(result);
       } catch (error) {
@@ -2299,7 +2346,31 @@ async function run() {
         res.status(500).send("Error adding staff");
       }
     });
-
+    app.post("/add/customer", async (req, res) => {
+      try {
+        const staffinfo = req.body;
+        const customer = await usercollection.findOne({
+          email: staffinfo?.email,
+        });
+        if (customer) {
+          res.send({ error: `${staffinfo?.email} was previously used` });
+        } else {
+          const result = await usercollection.insertOne(staffinfo);
+          if (result) {
+            sendPremimCustomer(
+              {
+                subject: `Your Premium Account has been created successfully!!! `,
+                message: staffinfo,
+              },
+              staffinfo?.email
+            );
+          }
+          res.send(result);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    });
     app.post("/employee/login", async (req, res) => {
       try {
         const { email, password } = req.body;
@@ -3242,31 +3313,6 @@ async function run() {
             },
           })
           .toArray();
-
-        // const attendanceThisMonth1 = await attendancellection
-        //   .aggregate([
-        //     {
-        //       $match: {
-        //         employee_id: employee_id,
-        //         attendance_date: {
-        //           $gte: {
-        //             $dateFromString: {
-        //               dateString: formattedFirstDay,
-        //               format: "%d/%m/%y",
-        //             },
-        //           },
-        //           $lte: {
-        //             $dateFromString: {
-        //               dateString: formattedLastDay,
-        //               format: "%d/%m/%y",
-        //             },
-        //           },
-        //         },
-        //       },
-        //     },
-        //   ])
-        //   .toArray();
-        // console.log(attendanceThisMonth1);
 
         const employeeinfo = await staffcollection.findOne({
           employee_id: employee_id,
