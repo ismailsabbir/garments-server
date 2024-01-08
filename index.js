@@ -183,6 +183,53 @@ const sendEmployeemail = (emaildata, emeil) => {
     }
   });
 };
+const sendEmployeeLeaveEmail = (emaildata, emeil) => {
+  console.log(emaildata);
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS,
+    },
+  });
+  const imageUrl =
+    "https://i.ibb.co/KqGcS3M/385565151-1096613294836586-7043829326437074719-n.png";
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: emeil,
+    subject: emaildata?.subject,
+    html: `
+    <html>
+    <head>
+      <title> ${emaildata?.subject}</title>
+      <link rel="stylesheet" type="text/css" href="/design.css">
+    </head>
+    <body>
+      <div style="background-color: #F4F7F8; padding: 10px; text-align: center; font-size: 15px;">
+      <img src="${imageUrl}" alt="Your Image" style="max-width: 100%;width: 200px; height: 100px;margin-bottom: 20px;" />
+      <h2 style={{ color: '#be5184' }}>Request  ${emaildata?.message.leave_status}</h2>
+        <h5>Your ${emaildata?.subject}</h5>
+        <p style="color: blue; font-size: 1.1rem; font-weight: 500;">Reason For Leave: ${emaildata?.message.reason}</p>
+        <p style="color: blue; font-size: 1.1rem; font-weight: 500;">Notice For You: ${emaildata?.message.notice}</p>
+        <p>Leave start from:${emaildata.message.from_date}</p>
+        <p>Leave end To: ${emaildata.message.to_date}</p>
+        <p>Leave Durations:${emaildata.message.no_day}</p>
+        <p>Name: ${emaildata?.message?.name}</p>
+        <p>Email: ${emaildata?.message.email}</p>
+      </div>
+    </body>
+  </html>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+};
 const sendPremimCustomer = (emaildata, emeil) => {
   console.log(emaildata);
   const transporter = nodemailer.createTransport({
@@ -303,6 +350,12 @@ async function run() {
     const salaryllection = client
       .db("garmentsinformation")
       .collection("salary");
+    const reviewcollection = client
+      .db("garmentsinformation")
+      .collection("reviews");
+    const leavescollection = client
+      .db("garmentsinformation")
+      .collection("leaves");
 
     const products = await shopprod1uctcollection.find({}).toArray();
     products.forEach((product) => {
@@ -396,6 +449,7 @@ async function run() {
       const result = await usercollection.updateOne(filter, updatedoc, option);
       res.send(result);
     });
+
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
@@ -1430,7 +1484,10 @@ async function run() {
     });
     app.get("/shopproduct", async (req, res) => {
       const query = {};
-      const shopproduct = await shopproductcollection.find(query).toArray();
+      const shopproduct = await shopproductcollection
+        .find(query)
+        // .sort({ averageRating: 1 })
+        .toArray();
       res.send(shopproduct);
     });
     app.get(`/detailsproduct/:categoryid/:id`, async (req, res) => {
@@ -3219,6 +3276,7 @@ async function run() {
         console.log(error);
       }
     });
+
     function parseCustomDate(dateString) {
       const [day, month, year] = dateString.split("/");
       const fullYear = parseInt("20" + year, 10);
@@ -3551,7 +3609,198 @@ async function run() {
         res.status(500).send({ error: "Payment failed" });
       }
     });
+    app.post("/addreview", async (req, res) => {
+      try {
+        const reviewinfo = req.body;
+        const query = {
+          category_id: reviewinfo?.category_id,
+          product_id: reviewinfo?.product_id,
+        };
+        const result = await reviewcollection.insertOne(reviewinfo);
+        if (result) {
+          const reviews = await reviewcollection.find(query).toArray();
+          const totalRating = reviews.reduce(
+            (sum, review) => sum + review.userRating,
+            0
+          );
+          const averageRating = Math.round(totalRating / reviews.length);
+          const filter = {
+            category_id: reviewinfo?.category_id,
+            product_id: reviewinfo?.product_id,
+          };
+          const option = { upsert: true };
+          const updatedoc = {
+            $set: {
+              averageRating: averageRating,
+            },
+          };
+          const updateproduct = await shopprod1uctcollection.updateOne(
+            filter,
+            updatedoc,
+            option
+          );
+          if ((result, updateproduct)) {
+            res.send({ sucess: true, result });
+          } else {
+            res.send({ success: false });
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    app.post("/leave/Request", async (req, res) => {
+      try {
+        const leaveinfo1 = req.body;
+        const fromDate = new Date(leaveinfo1?.from_date);
+        const toDate = new Date(leaveinfo1?.to_date);
+        const timeDifference = toDate - fromDate;
+        const no_day = timeDifference / (1000 * 60 * 60 * 24);
 
+        const leaveinfo = {
+          ...leaveinfo1,
+          no_day,
+        };
+        const isExist = await staffcollection.findOne({
+          email: leaveinfo?.email,
+        });
+        if (isExist) {
+          const result = await leavescollection.insertOne(leaveinfo);
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+        console.log(error);
+      }
+    });
+    app.get("/my_leave_requests", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const email = req.query.email;
+      let query = { email: email };
+      const leaves = await leavescollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = await leavescollection.countDocuments(query);
+      res.send({ count, leaves });
+    });
+    app.get("/all_leave_requests", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const leaves = await leavescollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = await leavescollection.countDocuments();
+      res.send({ count, leaves });
+    });
+    app.put("/leave/Request/edit", async (req, res) => {
+      try {
+        const leaveinfo = req.body;
+        const request_number = leaveinfo?.request_number;
+        console.log("leaveinfo", leaveinfo);
+        const filter = {
+          email: leaveinfo?.email,
+          request_number: leaveinfo?.request_number,
+        };
+        const option = { upsert: true };
+        const updatedoc = {
+          $set: {
+            name: leaveinfo?.name,
+            email: leaveinfo?.email,
+            apply_date: leaveinfo?.apply_date,
+            from_date: leaveinfo?.from_date,
+            to_date: leaveinfo?.to_date,
+            half_day: leaveinfo?.half_day,
+            leave_status: leaveinfo?.leave_status,
+            leave_type: leaveinfo?.leave_type,
+            reason: leaveinfo?.reason,
+            isupdate: true,
+            request_number: request_number,
+          },
+        };
+        const result = await leavescollection.updateOne(
+          filter,
+          updatedoc,
+          option
+        );
+        console.log(result);
+        if (result?.modifiedCount >= 1) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false, result });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+        console.log(error);
+      }
+    });
+
+    app.put("/leave/Response/edit", async (req, res) => {
+      try {
+        const leaveinfo = req.body;
+        const request_number = leaveinfo?.request_number;
+        console.log("leaveinfo", leaveinfo);
+        const filter = {
+          request_number: leaveinfo?.request_number,
+        };
+        const option = { upsert: true };
+        const updatedoc = {
+          $set: {
+            name: leaveinfo?.name,
+            email: leaveinfo?.email,
+            apply_date: leaveinfo?.apply_date,
+            to_date: leaveinfo?.to_date,
+            leave_status: leaveinfo?.leave_status,
+            reason: leaveinfo?.reason,
+            notice: leaveinfo?.notice,
+            no_day: leaveinfo?.no_day,
+            isupdate: true,
+            request_number: request_number,
+          },
+        };
+        const result = await leavescollection.updateOne(
+          filter,
+          updatedoc,
+          option
+        );
+        console.log(result);
+        if (result?.modifiedCount >= 1) {
+          sendEmployeeLeaveEmail(
+            {
+              subject: `Your Leave request is ${leaveinfo?.leave_status}!!! `,
+              message: leaveinfo,
+            },
+            leaveinfo?.email
+          );
+
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false, result });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+        console.log(error);
+      }
+    });
+
+    app.delete(
+      `/delete-request/:id`,
+      verifyjwt,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        console.log(id);
+        const query = { _id: new ObjectId(id) };
+        const result = await leavescollection.deleteOne(query);
+        res.send(result);
+      }
+    );
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
     });
