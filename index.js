@@ -356,6 +356,12 @@ async function run() {
     const leavescollection = client
       .db("garmentsinformation")
       .collection("leaves");
+    const missionCollection = client
+      .db("garmentsinformation")
+      .collection("missions");
+    const vissionsCollection = client
+      .db("garmentsinformation")
+      .collection("vissions");
 
     const products = await shopprod1uctcollection.find({}).toArray();
     products.forEach((product) => {
@@ -462,11 +468,132 @@ async function run() {
       const services = await servicescollections.find(query).toArray();
       res.send(services);
     });
+    app.get("/missions", async (req, res) => {
+      const query = {};
+      const mission = await missionCollection.find(query).toArray();
+      res.send({ mission });
+    });
+    app.post("/vission/add", async (req, res) => {
+      try {
+        const info = req.body;
+        const result = await vissionsCollection.insertOne(info);
+        if (result) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+      }
+    });
+    app.post("/mission/add", async (req, res) => {
+      try {
+        const info = req.body;
+        const result = await missionCollection.insertOne(info);
+        if (result) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+      }
+    });
+    app.get("/vissions", async (req, res) => {
+      const query = {};
+      const vission = await vissionsCollection.find(query).toArray();
+      console.log(vission);
+      res.send({ vission });
+    });
     app.get("/serviceDetails/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const service = await servicescollections.findOne(query);
       res.send(service);
+    });
+    app.put("/edit_vission/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const vission = req.body;
+        console.log(id, vission);
+        const options = { upsert: true };
+        const filter = { _id: new ObjectId(id) };
+        const updateorder = {
+          $set: {
+            vission_id: vission?.vission_id,
+            vision: vission?.vision,
+          },
+        };
+        const result = await vissionsCollection.updateOne(
+          filter,
+          updateorder,
+          options
+        );
+        if (result?.modifiedCount >= 1) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false, result });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+      }
+    });
+    app.put("/edit_mission/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const vission = req.body;
+        console.log(id, vission);
+        const options = { upsert: true };
+        const filter = { _id: new ObjectId(id) };
+        const updateorder = {
+          $set: {
+            mission_id: vission?.mission_id,
+            mission: vission?.mission,
+          },
+        };
+        const result = await missionCollection.updateOne(
+          filter,
+          updateorder,
+          options
+        );
+        if (result?.modifiedCount >= 1) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false, result });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+      }
+    });
+    app.delete("/delete-vission/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await vissionsCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result?.deletedCount >= 1) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ success: false });
+      }
+    });
+    app.delete("/delete-mission/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await missionCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result?.deletedCount >= 1) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ success: false });
+      }
     });
     app.get("/projects", async (req, res) => {
       const query = {};
