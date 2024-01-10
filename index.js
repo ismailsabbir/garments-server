@@ -1606,6 +1606,13 @@ async function run() {
       console.log(result);
       res.send(result);
     });
+    app.post("/blog_add", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await blogcollections.insertOne(request_info);
+      console.log(result);
+      res.send(result);
+    });
     app.post("/project_add", async (req, res) => {
       const request_info = req.body;
       console.log(request_info);
@@ -1944,6 +1951,27 @@ async function run() {
       const query = {};
       const blogs = await blogcollections.find(query).toArray();
       res.send(blogs);
+    });
+    app.post(`/blog/review/:id`, async (req, res) => {
+      try {
+        const info = req.body;
+        const id = req.params.id;
+        console.log(info, id);
+        const filter = { _id: new ObjectId(id) };
+        const update = {
+          $push: {
+            comments: info,
+          },
+        };
+        const result = await blogcollections.updateOne(filter, update);
+        if (result.modifiedCount === 1) {
+          res.status(200).json({ sucess: true });
+        } else {
+          res.status(404).json({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+      }
     });
     app.get("/members", async (req, res) => {
       const query = {};
@@ -2746,7 +2774,6 @@ async function run() {
       try {
         const categoryinfo = req.body;
         const id = req.params.id;
-        // console.log(staffInfo, id);
         const filter = {
           _id: new ObjectId(id),
         };
@@ -2776,6 +2803,44 @@ async function run() {
       } catch (error) {
         console.error(error);
         res.status(500).send("Internal Server Error");
+      }
+    });
+
+    app.put("/edit_blog", async (req, res) => {
+      try {
+        const categoryinfo = req.body;
+        const id = categoryinfo.id;
+        const filter = {
+          _id: new ObjectId(id),
+        };
+        const options = {
+          upsert: false,
+        };
+        const updateDoc = {
+          $set: {
+            image: categoryinfo?.image,
+            name: categoryinfo?.name,
+            date: categoryinfo?.date,
+            para1: categoryinfo?.para1,
+            para2: categoryinfo?.para2,
+            para3: categoryinfo?.para3,
+            para4: categoryinfo?.para4,
+          },
+        };
+        const result = await blogcollections.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        console.log(result);
+        if (result) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        console.error(error);
+        res.send({ sucess: false });
       }
     });
 
@@ -2869,6 +2934,24 @@ async function run() {
         res
           .status(500)
           .json({ message: "Error deleting service", error: error.message });
+        console.log("error");
+      }
+    });
+    app.delete("/delete-blog", async (req, res) => {
+      const productIds = req.body;
+      const query = { _id: { $in: productIds.map((id) => new ObjectId(id)) } };
+      try {
+        const result = await blogcollections.deleteMany(query);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No blog found for deletion" });
+          console.log("no blog found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting blog", error: error.message });
         console.log("error");
       }
     });
@@ -3012,6 +3095,27 @@ async function run() {
         res
           .status(500)
           .json({ message: "Error deleting service", error: error.message });
+        console.log("error");
+      }
+    });
+    app.delete("/delete-single-blog", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = {
+        _id: { $in: productIds.map((id) => new ObjectId(id)) },
+      };
+      try {
+        const result = await blogcollections.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No blog found for deletion" });
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting blog", error: error.message });
         console.log("error");
       }
     });
