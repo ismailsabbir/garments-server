@@ -1,0 +1,34 @@
+[
+    {
+        "picture": "https://i.ibb.co/8MZqJVK/Service-2.png",
+        "image":"https://i.ibb.co/fpccvYJ/fabric.jpg",
+        "image1": "https://i.ibb.co/y8cdZzr/deying.jpg",
+        "name": "Fabric Dyeing",
+        "process":[
+          {
+              "name":"Preparation",
+              "process":"The fabric is usually cleaned and pre-treated to remove any impurities, oils, or finishes that could interfere with dye uptake. This might involve processes like scouring and bleaching."
+          },
+          {
+              "name":"Dyeing",
+              "process":"The fabric is immersed in a dye bath containing the chosen dye. The dye bath is heated and agitated to ensure even dye distribution. The dye molecules bond with the fabric fibers to impart color."
+          },
+          {
+              "name":"Rinsing",
+              "process":" After dyeing, the fabric is rinsed thoroughly to remove excess dye and any unattached dye molecules. This step helps improve color fastness and prevents bleeding."
+          },
+          {
+              "name":"Fixation",
+              "process":"Depending on the type of dye, some fabrics might require a fixing agent or mordant to enhance color fastness. This step helps the dye molecules remain securely attached to the fabric."
+          },
+          {
+              "name":"Color Fastness Testing",
+              "process":"  Quality control involves testing the dyed fabric's color fastness to factors like light, washing, rubbing, and perspiration. This ensures that the dyed fabric retains its color and appearance over time."
+          }
+  
+        ],
+        "about": "Duis pellentesque mi nec iaculis sed convallis. Cras sed tellus ipsum. Fabric dyeing is a process in which color is applied to textiles or fabrics to achieve a desired hue. It's a crucial step in the production of colored garments and textiles. There are various methods and types of dyes used for fabric dyeing, each with its own advantages and limitations. Here's an overview of the fabric dyeing process",
+        "types":["The Direct Dyes","The Reactive Dyes","The Disperse Dyes","The Acid Dyes","The Vat Dyes","The Sulfur Dyes","The Basic Dyes"]
+  
+      }
+]

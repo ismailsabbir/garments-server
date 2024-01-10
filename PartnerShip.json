@@ -1,0 +1,38 @@
+[
+    {
+        "partnership_id":"01",
+        "Company_Name":"Strong Stall",
+        "start":"09-01-2024",
+        "company_logo":"https://i.ibb.co/3St38VF/Partner-7.png"
+    },
+    {
+        "partnership_id":"02",
+        "Company_Name":"Strong Stall",
+        "start":"09-01-2024",
+        "company_logo":"https://i.ibb.co/HPGWQnr/Partner-5.png"
+    },
+    {
+        "partnership_id":"03",
+        "Company_Name":"Strong Stall",
+        "start":"09-01-2024",
+        "company_logo":"https://i.ibb.co/1TNst4F/Partner-4.png"
+    },
+    {
+        "partnership_id":"04",
+        "Company_Name":"Strong Stall",
+        "start":"09-01-2024",
+        "company_logo":"https://i.ibb.co/WGpK6V2/Partner-3.png"
+    },
+    {
+        "partnership_id":"05",
+        "Company_Name":"Strong Stall",
+        "start":"09-01-2024",
+        "company_logo":"https://i.ibb.co/cvpvj2k/Partner-2.png"
+    },
+    {
+        "partnership_id":"06",
+        "Company_Name":"Strong Stall",
+        "start":"09-01-2024",
+        "company_logo":"https://i.ibb.co/bFmtxww/Partner-1.png"
+    }
+]

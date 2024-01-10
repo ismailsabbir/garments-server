@@ -362,6 +362,9 @@ async function run() {
     const vissionsCollection = client
       .db("garmentsinformation")
       .collection("vissions");
+    const partnershipcollection = client
+      .db("garmentsinformation")
+      .collection("partnership");
 
     const products = await shopprod1uctcollection.find({}).toArray();
     products.forEach((product) => {
@@ -593,6 +596,34 @@ async function run() {
         }
       } catch (error) {
         res.send({ success: false });
+      }
+    });
+    app.delete("/delete-partnership/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await partnershipcollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result?.deletedCount >= 1) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ success: false });
+      }
+    });
+    app.post("/add/Partnership", async (req, res) => {
+      try {
+        const partnership = req.body;
+        const result = await partnershipcollection.insertOne(partnership);
+        if (result) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
       }
     });
     app.get("/projects", async (req, res) => {
@@ -1551,6 +1582,34 @@ async function run() {
       const request_info = req.body;
       console.log(request_info);
       const result = await shopprod1uctcollection.insertOne(request_info);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/addService", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await servicescollections.insertOne(request_info);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/addProject", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await projectscollections.insertOne(request_info);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/service_add", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await servicescollections.insertOne(request_info);
+      console.log(result);
+      res.send(result);
+    });
+    app.post("/project_add", async (req, res) => {
+      const request_info = req.body;
+      console.log(request_info);
+      const result = await projectscollections.insertOne(request_info);
       console.log(result);
       res.send(result);
     });
@@ -2794,6 +2853,44 @@ async function run() {
         console.log("error");
       }
     });
+    app.delete("/delete-service", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = { _id: { $in: productIds.map((id) => new ObjectId(id)) } };
+      try {
+        const result = await servicescollections.deleteMany(query);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No service found for deletion" });
+          console.log("no service found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting service", error: error.message });
+        console.log("error");
+      }
+    });
+    app.delete("/delete-project", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = { _id: { $in: productIds.map((id) => new ObjectId(id)) } };
+      try {
+        const result = await projectscollections.deleteMany(query);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No project found for deletion" });
+          console.log("no project found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting project", error: error.message });
+        console.log("error");
+      }
+    });
     app.delete("/delete-customized-products", async (req, res) => {
       const productIds = req.body;
       const query = {
@@ -2894,6 +2991,48 @@ async function run() {
         res
           .status(500)
           .json({ message: "Error deleting products", error: error.message });
+        console.log("error");
+      }
+    });
+    app.delete("/delete-single-service", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = {
+        _id: { $in: productIds.map((id) => new ObjectId(id)) },
+      };
+      try {
+        const result = await servicescollections.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No service found for deletion" });
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting service", error: error.message });
+        console.log("error");
+      }
+    });
+    app.delete("/delete-single-project", async (req, res) => {
+      const productIds = req.body;
+      console.log(productIds);
+      const query = {
+        _id: { $in: productIds.map((id) => new ObjectId(id)) },
+      };
+      try {
+        const result = await projectscollections.deleteMany(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No project found for deletion" });
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting project", error: error.message });
         console.log("error");
       }
     });
@@ -3928,6 +4067,11 @@ async function run() {
         res.send(result);
       }
     );
+    app.get("/partnership", async (req, res) => {
+      const query = {};
+      const result = await partnershipcollection.find().toArray();
+      res.send(result);
+    });
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
     });

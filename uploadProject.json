@@ -1,0 +1,33 @@
+[
+    {
+        "picture1":"https://i.ibb.co/LSMxpYH/project1a.jpg",
+        "picture2":"https://i.ibb.co/d299NSc/project1b.jpg",
+        "image":"https://i.ibb.co/FkpMvrc/project1.jpg",
+        "name":"Cotton Fabric",
+        "process":[
+          {
+              "name":"Preparation",
+              "process":"The fabric is usually cleaned and pre-treated to remove any impurities, oils, or finishes that could interfere with dye uptake. This might involve processes like scouring and bleaching."
+          },
+          {
+              "name":"Dyeing",
+              "process":"The fabric is immersed in a dye bath containing the chosen dye. The dye bath is heated and agitated to ensure even dye distribution. The dye molecules bond with the fabric fibers to impart color."
+          },
+          {
+              "name":"Rinsing",
+              "process":" After dyeing, the fabric is rinsed thoroughly to remove excess dye and any unattached dye molecules. This step helps improve color fastness and prevents bleeding."
+          },
+          {
+              "name":"Fixation",
+              "process":"Depending on the type of dye, some fabrics might require a fixing agent or mordant to enhance color fastness. This step helps the dye molecules remain securely attached to the fabric."
+          },
+          {
+              "name":"Color Fastness Testing",
+              "process":"  Quality control involves testing the dyed fabric's color fastness to factors like light, washing, rubbing, and perspiration. This ensures that the dyed fabric retains its color and appearance over time."
+          }
+  
+        ],
+        "about": "Cotton fabric, derived from natural fibers of the cotton plant, offers unparalleled softness, breathability, and versatility. Its smooth texture feels gentle on the skin while allowing air circulation, making it a go-to choice for comfortable clothing, especially in warmer weather. Highly absorbent, it wicks away moisture, enhancing comfort. Its adaptability to various dyes and prints enables a wide range of styles. Easy to care for and historically significant, cotton fabric is a timeless textile cherished for its comfort and versatility"
+  
+      }
+]
