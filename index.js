@@ -4176,6 +4176,284 @@ async function run() {
       const result = await partnershipcollection.find().toArray();
       res.send(result);
     });
+    app.get("/today-orders", async (req, res) => {
+      try {
+        const today = new Date();
+        console.log(today.toLocaleDateString("en-GB"));
+        const todayOrders = await shopordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            order: "paid",
+          })
+          .toArray();
+        const todycustomorders = await ordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            order: "paid",
+          })
+          .toArray();
+        const totla_customized_price = todycustomorders.reduce(
+          (sum, order) => sum + order.total_price,
+          0
+        );
+        const totalPrice = todayOrders.reduce(
+          (sum, order) => sum + order.total_price,
+          0
+        );
+        res.json({
+          todayOrders,
+          totalPrice,
+          todycustomorders,
+          totla_customized_price,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
+    app.get("/currentMonthOrders", async (req, res) => {
+      const currentDate = moment();
+      const startOfMonth = moment(currentDate).startOf("month");
+      const endOfMonth = moment(currentDate).endOf("month");
+      const startOfMonthString = startOfMonth.format("DD/MM/YYYY");
+      const endOfMonthString = endOfMonth.format("DD/MM/YYYY");
+      console.log(startOfMonthString, endOfMonthString);
+      try {
+        const orders = await shopordercollection
+          .find({
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 6, 4] },
+                    startOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 6, 4] },
+                    endOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    startOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    endOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    startOfMonthString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    endOfMonthString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+            order: "paid",
+          })
+          .toArray();
+
+        const totalPrice = orders.reduce(
+          (sum, order) => sum + order.total_price,
+          0
+        );
+
+        const customizedorders = await ordercollection
+          .find({
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 6, 4] },
+                    startOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 6, 4] },
+                    endOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    startOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    endOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    startOfMonthString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    endOfMonthString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+            order: "paid",
+          })
+          .toArray();
+        const customizedPrice = customizedorders.reduce(
+          (sum, order) => sum + order.total_price,
+          0
+        );
+
+        res.json({ orders, totalPrice, customizedorders, customizedPrice });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+    app.get("/currentYearOrders", async (req, res) => {
+      const currentYear = moment().year();
+      const startOfYear = moment().startOf("year");
+      const endOfYear = moment().endOf("year");
+      const startOfYearString = startOfYear.format("DD/MM/YYYY");
+      const endOfYearString = endOfYear.format("DD/MM/YYYY");
+      console.log(startOfYearString, endOfYearString);
+      try {
+        const orders = await shopordercollection
+          .find({
+            $expr: {
+              $and: [
+                {
+                  $eq: [
+                    { $toInt: { $substrCP: ["$order_date", 6, 4] } },
+                    currentYear,
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    startOfYearString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    endOfYearString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    startOfYearString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    endOfYearString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+            order: "paid",
+          })
+          .toArray();
+
+        const customizedorders = await ordercollection
+          .find({
+            $expr: {
+              $and: [
+                {
+                  $eq: [
+                    { $toInt: { $substrCP: ["$order_date", 6, 4] } },
+                    currentYear,
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    startOfYearString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    endOfYearString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    startOfYearString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    endOfYearString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+            order: "paid",
+          })
+          .toArray();
+
+        const totalPrice = orders.reduce(
+          (sum, order) => sum + order.total_price,
+          0
+        );
+        const customizedprice = customizedorders.reduce(
+          (sum, order) => sum + order.total_price,
+          0
+        );
+
+        res.json({ orders, totalPrice, customizedorders, customizedprice });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
+    // app.get("/yesterdayOrders", async (req, res) => {
+    //   const yesterdayStart = new Date();
+    //   yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    //   yesterdayStart.setHours(0, 0, 0, 0);
+    //   const yesterdayEnd = new Date();
+    //   yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
+    //   yesterdayEnd.setHours(23, 59, 59, 999);
+    //   console.log(
+    //     "Yesterday Start:",
+    //     yesterdayStart.toLocaleDateString("en-GB")
+    //   );
+    //   console.log("Yesterday End:", yesterdayEnd.toLocaleDateString("en-GB"));
+    //   const yesterdayOrders = await shopordercollection
+    //     .find({
+    //       order_date: {
+    //         $gte: yesterdayStart,
+    //         $lte: yesterdayEnd,
+    //       },
+    //       order: "paid",
+    //     })
+    //     .toArray();
+    //   res.send(yesterdayOrders);
+    // });
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
     });
