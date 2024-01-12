@@ -2158,6 +2158,7 @@ async function run() {
         } else {
           query = {};
         }
+
         let product = await shopordercollection
           .find(query)
           .skip(page * size)
@@ -4176,6 +4177,38 @@ async function run() {
       const result = await partnershipcollection.find().toArray();
       res.send(result);
     });
+    app.get("/currents_orders", async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const today = new Date();
+      console.log(today.toLocaleDateString("en-GB"));
+      const todayOrders = await shopordercollection
+        .find({
+          order_date: today.toLocaleDateString("en-GB"),
+        })
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const countorders = await shopordercollection.countDocuments({
+        order_date: today.toLocaleDateString("en-GB"),
+      });
+      const todaycustom = await ordercollection
+        .find({
+          order_date: today.toLocaleDateString("en-GB"),
+        })
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const countcustom = await ordercollection.countDocuments({
+        order_date: today.toLocaleDateString("en-GB"),
+      });
+      res.send({
+        todayOrders,
+        countorders,
+        todaycustom,
+        countcustom,
+      });
+    });
     app.get("/today-orders", async (req, res) => {
       try {
         const today = new Date();
@@ -4186,10 +4219,65 @@ async function run() {
             order: "paid",
           })
           .toArray();
+        const todayordersprocessing = await shopordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            status: "Processing",
+            order: "paid",
+          })
+          .toArray();
+        const todayorderdalivered = await shopordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            order: "paid",
+            status: "Delivered",
+          })
+          .toArray();
+        const todayorderpending = await shopordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            order: "paid",
+            status: "Pending",
+          })
+          .toArray();
+        const todayordercancel = await shopordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            status: "canceled",
+          })
+          .toArray();
+
         const todycustomorders = await ordercollection
           .find({
             order_date: today.toLocaleDateString("en-GB"),
             order: "paid",
+          })
+          .toArray();
+        const todaycustomprocessing = await ordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            status: "Processing",
+            order: "paid",
+          })
+          .toArray();
+        const todaycustomdalivered = await ordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            order: "paid",
+            status: "Delivered",
+          })
+          .toArray();
+        const todaycustomrpending = await ordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            order: "paid",
+            status: "Pending",
+          })
+          .toArray();
+        const todaycustomcancel = await ordercollection
+          .find({
+            order_date: today.toLocaleDateString("en-GB"),
+            status: "canceled",
           })
           .toArray();
         const totla_customized_price = todycustomorders.reduce(
@@ -4205,13 +4293,20 @@ async function run() {
           totalPrice,
           todycustomorders,
           totla_customized_price,
+          todaycustomcancel,
+          todaycustomdalivered,
+          todaycustomprocessing,
+          todaycustomrpending,
+          todayordercancel,
+          todayorderdalivered,
+          todayorderpending,
+          todayordersprocessing,
         });
       } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
       }
     });
-
     app.get("/currentMonthOrders", async (req, res) => {
       const currentDate = moment();
       const startOfMonth = moment(currentDate).startOf("month");
@@ -4266,6 +4361,63 @@ async function run() {
           })
           .toArray();
 
+        const orderscancel = await shopordercollection
+          .find({
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 6, 4] },
+                    startOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 6, 4] },
+                    endOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    startOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    endOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    startOfMonthString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    endOfMonthString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+          })
+          .toArray();
+
+        const monthorderprocessing = orders.filter(
+          (order) => order?.status === "Processing"
+        );
+        const monthorderdelivered = orders.filter(
+          (order) => order?.status === "Delivered"
+        );
+        const monthorderpending = orders.filter(
+          (order) => order?.status === "Pending"
+        );
+        const monthcancelorders = orderscancel.filter(
+          (order) => order?.status === "canceled"
+        );
         const totalPrice = orders.reduce(
           (sum, order) => sum + order.total_price,
           0
@@ -4316,12 +4468,83 @@ async function run() {
             order: "paid",
           })
           .toArray();
+
+        const customizedorderscancel = await ordercollection
+          .find({
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 6, 4] },
+                    startOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 6, 4] },
+                    endOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    startOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 3, 2] },
+                    endOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    startOfMonthString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$order_date", 0, 2] },
+                    endOfMonthString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+          })
+          .toArray();
+
+        const monthcustomprocessing = customizedorders.filter(
+          (order) => order?.status === "Processing"
+        );
+        const monthcustomdelivered = customizedorders.filter(
+          (order) => order?.status === "Delivered"
+        );
+        const monthcustompending = customizedorders.filter(
+          (order) => order?.status === "Pending"
+        );
+        const monthcustomcancel = customizedorderscancel.filter(
+          (order) => order?.status === "canceled"
+        );
         const customizedPrice = customizedorders.reduce(
           (sum, order) => sum + order.total_price,
           0
         );
 
-        res.json({ orders, totalPrice, customizedorders, customizedPrice });
+        res.json({
+          orders,
+          totalPrice,
+          customizedorders,
+          customizedPrice,
+          monthorderprocessing,
+          monthorderdelivered,
+          monthorderpending,
+          monthcancelorders,
+          monthcustomprocessing,
+          monthcustomdelivered,
+          monthcustompending,
+          monthcustomcancel,
+        });
       } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -4431,29 +4654,120 @@ async function run() {
       }
     });
 
-    // app.get("/yesterdayOrders", async (req, res) => {
-    //   const yesterdayStart = new Date();
-    //   yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-    //   yesterdayStart.setHours(0, 0, 0, 0);
-    //   const yesterdayEnd = new Date();
-    //   yesterdayEnd.setDate(yesterdayEnd.getDate() - 1);
-    //   yesterdayEnd.setHours(23, 59, 59, 999);
-    //   console.log(
-    //     "Yesterday Start:",
-    //     yesterdayStart.toLocaleDateString("en-GB")
-    //   );
-    //   console.log("Yesterday End:", yesterdayEnd.toLocaleDateString("en-GB"));
-    //   const yesterdayOrders = await shopordercollection
-    //     .find({
-    //       order_date: {
-    //         $gte: yesterdayStart,
-    //         $lte: yesterdayEnd,
-    //       },
-    //       order: "paid",
-    //     })
-    //     .toArray();
-    //   res.send(yesterdayOrders);
+    app.get("/yesterdayOrders", async (req, res) => {
+      var today = new Date();
+      var yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+      const yesterdayshopOrders = await shopordercollection
+        .find({
+          order_date: yesterday.toLocaleDateString("en-GB"),
+          order: "paid",
+        })
+        .toArray();
+      const yesterdaycustomorders = await ordercollection
+        .find({
+          order_date: yesterday.toLocaleDateString("en-GB"),
+          order: "paid",
+        })
+        .toArray();
+      const totalyesterdayshopPrice = yesterdayshopOrders.reduce(
+        (sum, order) => sum + order.total_price,
+        0
+      );
+      const totalyesterdaycustomPrice = yesterdaycustomorders.reduce(
+        (sum, order) => sum + order.total_price,
+        0
+      );
+
+      res.send({
+        yesterdayshopOrders,
+        yesterdaycustomorders,
+        totalyesterdayshopPrice,
+        totalyesterdaycustomPrice,
+      });
+    });
+    // app.get("/weeklyordersu", async (req, res) => {
+    //   const today = new Date();
+    //   const startOfWeek = new Date(today);
+    //   startOfWeek.setDate(today.getDate() - today.getDay());
+
+    //   const weekDates = [];
+    //   for (let i = 0; i < 7; i++) {
+    //     const currentDate = new Date(startOfWeek);
+    //     currentDate.setDate(startOfWeek.getDate() + i);
+    //     weekDates.push(currentDate.toLocaleDateString("en-GB"));
+    //   }
+
+    //   const weeklyOrdersPromises = weekDates.map(async (date) => {
+    //     const orders = await shopordercollection
+    //       .find({
+    //         order_date: date,
+    //         order: "paid",
+    //       })
+    //       .toArray();
+    //     return {
+    //       name: date,
+    //       uv: orders.length,
+    //       pv: orders.length,
+    //       amt: orders.length,
+    //     };
+    //   });
+
+    //   const weeklyOrders = await Promise.all(weeklyOrdersPromises);
+
+    //   res.send(weeklyOrders);
     // });
+
+    app.get("/weeklyordersl", async (req, res) => {
+      const today = new Date();
+      const dateRanges = [];
+      for (let i = 0; i < 10; i++) {
+        const currentDate = new Date(today);
+        currentDate.setDate(today.getDate() - i);
+        dateRanges.push(currentDate.toLocaleDateString("en-GB"));
+      }
+      const ordersPromises = dateRanges.map(async (date) => {
+        const orders = await shopordercollection
+          .find({
+            order_date: date,
+            order: "paid",
+          })
+          .toArray();
+        return {
+          name: date,
+          uv: orders.length,
+          pv: orders.length,
+          amt: orders.length,
+        };
+      });
+      const weeklyOrders = await Promise.all(ordersPromises);
+      res.send(weeklyOrders);
+    });
+    app.get("/weeklycustomorders", async (req, res) => {
+      const today = new Date();
+      const dateRanges = [];
+      for (let i = 0; i < 10; i++) {
+        const currentDate = new Date(today);
+        currentDate.setDate(today.getDate() - i);
+        dateRanges.push(currentDate.toLocaleDateString("en-GB"));
+      }
+      const ordersPromises = dateRanges.map(async (date) => {
+        const orders = await ordercollection
+          .find({
+            order_date: date,
+            order: "paid",
+          })
+          .toArray();
+        return {
+          name: date,
+          uv: orders.length,
+          pv: orders.length,
+          amt: orders.length,
+        };
+      });
+      const weeklyOrders = await Promise.all(ordersPromises);
+      res.send(weeklyOrders);
+    });
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
     });
