@@ -133,7 +133,6 @@ const sendsucessemail = (emaildata, emeil) => {
       console.log(error);
     } else {
       console.log("Email sent: " + info.response);
-      // do something useful
     }
   });
 };
@@ -275,6 +274,93 @@ const sendPremimCustomer = (emaildata, emeil) => {
     }
   });
 };
+const sendPremimCustomer1 = (emaildata, emeil) => {
+  console.log(emaildata);
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS,
+    },
+  });
+  const imageUrl =
+    "https://i.ibb.co/KqGcS3M/385565151-1096613294836586-7043829326437074719-n.png";
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: emeil,
+    subject: emaildata?.subject,
+    html: `
+    <html>
+    <head>
+      <title> ${emaildata?.subject}</title>
+      <link rel="stylesheet" type="text/css" href="/design.css">
+    </head>
+    <body>
+      <div style="background-color: #F4F7F8; padding: 10px; text-align: center; font-size: 15px;">
+      <img src="${imageUrl}" alt="Your Image" style="max-width: 100%;width: 200px; height: 100px;margin-bottom: 20px;" />
+        <h5>${emaildata?.subject}</h5>
+        <p>Name: ${emaildata.message.name}</p>
+        <p>Email:${emaildata.message.email}</p>
+        <p>Role: ${emaildata?.message.role} Customer</p>
+        <p>Now you get 20% discount from all orders.</p>
+      </div>
+    </body>
+  </html>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+};
+
+const sendPremimCustomer2 = (emaildata, emeil) => {
+  console.log(emaildata);
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASS,
+    },
+  });
+  const imageUrl =
+    "https://i.ibb.co/KqGcS3M/385565151-1096613294836586-7043829326437074719-n.png";
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: emeil,
+    subject: emaildata?.subject,
+    html: `
+    <html>
+    <head>
+      <title> ${emaildata?.subject}</title>
+      <link rel="stylesheet" type="text/css" href="/design.css">
+    </head>
+    <body>
+      <div style="background-color: #F4F7F8; padding: 10px; text-align: center; font-size: 15px;">
+      <img src="${imageUrl}" alt="Your Image" style="max-width: 100%;width: 200px; height: 100px;margin-bottom: 20px;" />
+        <h5>${emaildata?.subject}</h5>
+        <p>Name: ${emaildata.message.name}</p>
+        <p>Email:${emaildata.message.email}</p>
+        <p>Role: ${emaildata?.message.role} Customer</p>
+        <p>Now you cannot get a discount. Because  You normal customer.</p>
+      </div>
+    </body>
+  </html>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+};
 async function run() {
   await client.connect();
   try {
@@ -365,6 +451,9 @@ async function run() {
     const partnershipcollection = client
       .db("garmentsinformation")
       .collection("partnership");
+    const settingcollection = client
+      .db("garmentsinformation")
+      .collection("setting");
 
     const products = await shopprod1uctcollection.find({}).toArray();
     products.forEach((product) => {
@@ -420,7 +509,6 @@ async function run() {
           waislistproductSimilarity * featureWeights.wishlist +
           cartSimilarity * featureWeights.cart +
           userBehaviorSimilarity * featureWeights.userBehavior;
-        // console.log(totalSimilarity);
         if (totalSimilarity >= 0.1) {
           recommendedProducts.push({
             product: product,
@@ -685,6 +773,7 @@ async function run() {
     });
     app.post("/requesed_order", async (req, res) => {
       const request_info = req.body;
+      console.log("request_info", request_info);
       sendemail(
         {
           subject: `Order Confirm`,
@@ -693,6 +782,18 @@ async function run() {
         request_info?.email
       );
       const result = await ordercollection.insertOne(request_info);
+      // const product = await colorproductcollections.updateOne(
+      //   {
+      //     name: request_info?.category_name,
+      //     color_name: request_info?.colorname,
+      //   },
+      //   {
+      //     $inc: {
+      //       available: -parseInt(request_info?.pieces),
+      //     },
+      //   }
+      // );
+      // console.log(product);
       res.send(request_info);
     });
 
@@ -753,13 +854,9 @@ async function run() {
           );
 
           if (result.modifiedCount === 1) {
-            // console.log("update");
           } else {
-            // res.status(404).send("User not found or not updated.");
           }
-        } catch (error) {
-          // res.status(500).send("Internal server error.");
-        }
+        } catch (error) {}
 
         res.send(request_info);
       } catch (error) {
@@ -979,10 +1076,6 @@ async function run() {
       res.send(product);
     });
     app.post("/wishlistproduct", async (req, res) => {
-      // const decoded = req.decoded;
-      // if (decoded.email !== req.query.email) {
-      //   return res.status(403).send({ message: "forbidden access" });
-      // }
       const request_info = req.body;
       console.log(request_info);
       const result = await wishlistproductcollection.insertOne(request_info);
@@ -1542,11 +1635,7 @@ async function run() {
       const user = await usercollection.findOne(query);
       res.send(user);
     });
-    // app.get("/allusers", async (req, res) => {
-    //   const query = {};
-    //   const users = await usercollection.find(query).toArray();
-    //   res.send(users);
-    // });
+
     app.get("/shopcategory", async (req, res) => {
       const query = {};
       const shopcategory = await shopcategorycollection.find(query).toArray();
@@ -1677,10 +1766,7 @@ async function run() {
     });
     app.get("/shopproduct", async (req, res) => {
       const query = {};
-      const shopproduct = await shopproductcollection
-        .find(query)
-        // .sort({ averageRating: 1 })
-        .toArray();
+      const shopproduct = await shopproductcollection.find(query).toArray();
       res.send(shopproduct);
     });
     app.get(`/detailsproduct/:categoryid/:id`, async (req, res) => {
@@ -1791,18 +1877,6 @@ async function run() {
       const count = await categorycollections.countDocuments(query);
       console.log(count);
       res.send({ count, category });
-
-      // const page = req.query.page;
-      // const size = parseInt(req.query.size);
-      // const query = {};
-      // const category = await categorycollections
-      //   .find(query)
-      //   .skip(page * size)
-      //   .limit(size)
-      //   .toArray();
-      // const count = await categorycollections.countDocuments(query);
-
-      // res.send({ count, category });
     });
 
     app.get("/customized-color-product-all", async (req, res) => {
@@ -2041,18 +2115,14 @@ async function run() {
         .toArray();
       const emailproduct = await shopordercollection.find(Query).toArray();
       console.log(emailproduct?.length);
-      // let count = await shopordercollection.estimatedDocumentCount();
       let count = emailproduct?.length;
-
       if (search) {
         const idproduct = product.find((order) => order?.orderid === search);
         product = [idproduct];
         count = product.length;
       }
-
       res.send({ count, product });
     });
-
     app.get("/allshoporders", verifyjwt, async (req, res) => {
       try {
         const page = req.query.page;
@@ -2158,7 +2228,6 @@ async function run() {
         } else {
           query = {};
         }
-
         let product = await shopordercollection
           .find(query)
           .skip(page * size)
@@ -2170,7 +2239,6 @@ async function run() {
         console.log(error);
       }
     });
-
     app.get("/customizedorders", verifyjwt, async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
@@ -2179,7 +2247,6 @@ async function run() {
       if (decoded.email !== req.query.email) {
         return res.status(403).send({ message: "forbidden access" });
       }
-
       let Query = {};
       if (req.query.email) {
         Query = {
@@ -2192,7 +2259,6 @@ async function run() {
         .limit(size)
         .toArray();
       const emailproduct = await ordercollection.find(Query).toArray();
-      // let count = await ordercollection.estimatedDocumentCount();
       let count = emailproduct?.length;
       if (search) {
         const idproduct = product.find((order) => order?.orderid === search);
@@ -2202,32 +2268,6 @@ async function run() {
 
       res.send({ count, product });
     });
-    // app.get("/allcustomizedorders", verifyjwt, async (req, res) => {
-    //   const page = req.query.page;
-    //   const size = parseInt(req.query.size);
-    //   const search = parseInt(req.query.search);
-    //   const decoded = req.decoded;
-    //   if (decoded.email !== req.query.email) {
-    //     return res.status(403).send({ message: "forbidden access" });
-    //   }
-    //   let Query = {};
-    //   let product = await ordercollection
-    //     .find(Query)
-    //     .skip(page * size)
-    //     .limit(size)
-    //     .toArray();
-    //   // const emailproduct = await ordercollection.find(Query).toArray();
-    //   let count = await ordercollection.estimatedDocumentCount();
-    //   // let count = emailproduct?.length;
-    //   if (search) {
-    //     const idproduct = product.find((order) => order?.orderid === search);
-    //     product = [idproduct];
-    //     count = product.length;
-    //   }
-
-    //   res.send({ count, product });
-    // });
-
     app.get("/allcustomizedorders", verifyjwt, async (req, res) => {
       try {
         const page = req.query.page;
@@ -2512,15 +2552,30 @@ async function run() {
     });
 
     app.get("/staff_name", verifyjwt, verifyAdmin, async (req, res) => {
+      console.log("click");
       const page = req.query.page;
       const size = parseInt(req.query.size);
-      const searchvalue = req.query.search;
+      const searchname = req.query.search;
+      const searchemail = req.query.searchemail;
+      const role = req.query.role;
+      const reset = req.query.reset;
+      console.log("searchname", searchname);
       let query = {};
-      if (searchvalue.length) {
+      if (searchname?.length >= 1 && searchname) {
         query = {
           $text: {
-            $search: searchvalue,
+            $search: searchname,
           },
+        };
+      }
+      if (searchemail && searchemail?.length) {
+        query = {
+          email: searchemail,
+        };
+      }
+      if (role && role?.length >= 1) {
+        query = {
+          role: role,
         };
       }
       let result = await staffcollection
@@ -2530,13 +2585,87 @@ async function run() {
         .toArray();
       const count = await staffcollection.countDocuments(query);
       console.log(count);
+      console.log("result", result);
       res.send({ result, count });
     });
+    app.get(
+      "/staff_information",
+      verifyjwt,
+      verifyEmployee,
+      async (req, res) => {
+        console.log("click");
+        const page = req.query.page;
+        const size = parseInt(req.query.size);
+        const searchname = req.query.search;
+        const searchemail = req.query.searchemail;
+        const role = req.query.role;
+        const reset = req.query.reset;
+        console.log("searchname", searchname);
+        let query = {};
+        if (searchname?.length >= 1 && searchname) {
+          query = {
+            $text: {
+              $search: searchname,
+            },
+          };
+        }
+        if (searchemail && searchemail?.length) {
+          query = {
+            email: searchemail,
+          };
+        }
+        if (role && role?.length >= 1) {
+          query = {
+            role: role,
+          };
+        }
+        let result = await staffcollection
+          .find(query)
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+        const count = await staffcollection.countDocuments(query);
+        console.log(count);
+        console.log("result", result);
+        res.send({ result, count });
+      }
+    );
     app.get("/allusers", async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
-      const searchvalue = req.query.search;
-      const query = {};
+      const searchname = req.query.searchname;
+      const searchemail = req.query.searchemail;
+      const searchrole = req.query.searchrole;
+      const reset = req.query.reset;
+      console.log(searchname, searchemail, searchrole, reset);
+      let query = {};
+      if (searchname.length >= 1 && searchname) {
+        console.log("search name");
+        email = {
+          $text: {
+            $search: searchname,
+          },
+        };
+      }
+      if (searchemail && searchemail?.length >= 1) {
+        console.log("search email");
+        query = {
+          email: searchemail,
+        };
+      }
+      if (searchrole && searchrole === "Premium") {
+        console.log("search role");
+        query = {
+          role: "Premium",
+        };
+      }
+      if (searchrole && searchrole === "normal") {
+        query = {
+          role: {
+            $ne: "Premium",
+          },
+        };
+      }
       const result = await usercollection
         .find(query)
         .skip(page * size)
@@ -2567,7 +2696,6 @@ async function run() {
       const staff = req.query.staff;
       const page = req.query.page;
       const size = parseInt(req.query.size);
-      console.log(staff);
       let query = {};
       if (staff) {
         query = { role: staff };
@@ -2582,18 +2710,28 @@ async function run() {
       res.send({ result, count });
     });
 
-    // app.post("/addstaff", async (req, res) => {
-    //   const staffinfo = req.body;
-    //   const prefix = "E-";
-    //   const min = 10000;
-    //   const max = 99999;
-    //   const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    //   const employee_id = `${prefix}${randomNum}`;
-    //   const info = { ...staffinfo, employee_id };
-    //   const result = await staffcollection.insertOne(info);
-    //   res.send(result);
-    //   console.log(result);
-    // });
+    app.get(
+      "/single_employee_staff",
+      verifyjwt,
+      verifyEmployee,
+      async (req, res) => {
+        const staff = req.query.staff;
+        const page = req.query.page;
+        const size = parseInt(req.query.size);
+        let query = {};
+        if (staff) {
+          query = { role: staff };
+        }
+        const staffs = await staffcollection.find(query).toArray();
+        const result = await staffcollection
+          .find(query)
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+        const count = staffs?.length;
+        res.send({ result, count });
+      }
+    );
 
     app.post("/addstaff", async (req, res) => {
       try {
@@ -2685,6 +2823,46 @@ async function run() {
       };
       const result = await staffcollection.updateOne(filter, updatedoc, option);
       res.send(result);
+    });
+    app.put("/edit_customers", async (req, res) => {
+      console.log("click");
+      try {
+        const staffinfo = req.body;
+        console.log(staffinfo);
+
+        const filter = {
+          _id: new ObjectId(staffinfo?.id),
+        };
+        const option = {
+          upsert: true,
+        };
+        const updatedoc = {
+          $set: {
+            name: staffinfo?.name,
+            email: staffinfo?.email,
+            lastname: staffinfo?.lastname,
+            photo: staffinfo?.photo,
+            phone: staffinfo?.phone,
+            password: staffinfo?.password,
+            role: staffinfo?.role,
+            created_date: staffinfo?.created_date,
+            isCustomer: staffinfo?.isCustomer,
+          },
+        };
+        const result = await usercollection.updateOne(
+          filter,
+          updatedoc,
+          option
+        );
+        console.log(result);
+        if (result.modifiedCount >= 1) {
+          res.send({ sucess: true, result });
+        } else {
+          res.send({ sucess: false });
+        }
+      } catch (error) {
+        res.send({ sucess: false });
+      }
     });
     app.put("/edit_product/:id", async (req, res) => {
       try {
@@ -3185,6 +3363,18 @@ async function run() {
         res.send(result);
       }
     );
+    app.delete(
+      `/delete-customers/:id`,
+      verifyjwt,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        console.log(id);
+        const query = { _id: new ObjectId(id) };
+        const result = await usercollection.deleteOne(query);
+        res.send(result);
+      }
+    );
     app.put("/staff/admin/:id", verifyjwt, verifyAdmin, async (req, res) => {
       const decodedemail = req.decoded.email;
       console.log(decodedemail);
@@ -3203,6 +3393,73 @@ async function run() {
       const result = await staffcollection.updateOne(filter, updatedoc, option);
       res.send(result);
     });
+    app.put(
+      "/customer/premium/:id/:status",
+      verifyjwt,
+      verifyAdmin,
+      async (req, res) => {
+        const decodedemail = req.decoded.email;
+        console.log(decodedemail);
+        const id = req.params.id;
+        const status = req.params.status;
+        const email = req.params.email;
+        const filter = {
+          _id: new ObjectId(id),
+        };
+        const option = {
+          upsert: true,
+        };
+        let updatedoc = {
+          $set: {
+            role: "Premium",
+          },
+        };
+        if (status && status?.length >= 1 && status === "Normal") {
+          updatedoc = {
+            $set: {
+              role: "Normal",
+            },
+          };
+        }
+        if (status && status?.length >= 1 && status === "Premium") {
+          updatedoc = {
+            $set: {
+              role: "Premium",
+            },
+          };
+        }
+        const result = await usercollection.updateOne(
+          filter,
+          updatedoc,
+          option
+        );
+        const staffinfo = await usercollection.findOne({
+          _id: new ObjectId(id),
+        });
+        console.log(staffinfo);
+        if (staffinfo && result && status === "Premium") {
+          sendPremimCustomer1(
+            {
+              subject: `Now your account is ${status} !!!`,
+              message: staffinfo,
+            },
+            staffinfo?.email
+          );
+        }
+        if (staffinfo && result && status === "Normal") {
+          sendPremimCustomer2(
+            {
+              subject: `Now your account is ${status} !!!`,
+              message: staffinfo,
+            },
+            staffinfo?.email
+          );
+        }
+
+        res.send(result);
+      }
+    );
+
     app.get(`/staff/admin/:email`, async (req, res) => {
       const email = req.params.email;
       const query = {
@@ -3287,144 +3544,6 @@ async function run() {
         console.log(err);
       }
     });
-
-    // app.post("/addAttendance", async (req, res) => {
-    //   try {
-    //     const staffinfo = req.body;
-    //     if (!isValidEmployeeId(staffinfo.employee_id)) {
-    //       return res.status(400).json({ error: "Invalid Employee ID" });
-    //     }
-    //     const currentTime = moment();
-    //     const before8AM = moment("08:00", "HH:mm");
-    //     const after5PM = moment("17:00", "HH:mm");
-
-    //     if (
-    //       currentTime.isBefore(before8AM) ||
-    //       currentTime.isSameOrAfter(after5PM)
-    //     ) {
-    //       return res.status(400).json({
-    //         error: "Attendance can only be given between 8 AM and 5 PM",
-    //       });
-    //     }
-    //     staffinfo.attendance_date = currentTime.format("DD/MM/YY");
-    //     staffinfo.attendance_time = currentTime.format("hh:mm A");
-    //     const result = await attendancellection.insertOne(staffinfo);
-    //     res.status(200).json({ success: true, message: "Attendance added" });
-    //   } catch (error) {
-    //     console.error(error);
-    //     res.status(500).json({ error: "Internal Server Error" });
-    //   }
-    // });
-
-    // async function isValidEmployeeId(employeeId) {
-    //   try {
-    //     const regex = /^E-\d{5}$/;
-    //     if (!regex.test(employeeId)) {
-    //       return false;
-    //     }
-    //     const employee = await staffcollection.findOne({
-    //       employee_id: employeeId,
-    //     });
-    //     return !!employee;
-    //   } finally {
-    //     await client.close();
-    //   }
-    // }
-
-    // app.post("/addAttendance", async (req, res) => {
-    //   try {
-    //     const staffinfo1 = req.body;
-    //     const isvalidatedemployee = await staffcollection.findOne({
-    //       employee_id: staffinfo1.employee_id,
-    //     });
-    //     if (!isvalidatedemployee) {
-    //       return res.status(400).json({ error: "Invalid Employee ID" });
-    //     }
-    //     const photo = isvalidatedemployee?.photo;
-    //     const name = isvalidatedemployee?.name;
-    //     const staffinfo = {
-    //       ...staffinfo1,
-    //       photo,
-    //       name,
-    //     };
-    //     const currentTime = moment();
-    //     // const before8AM = moment("8:00", "HH:mm");
-    //     // const after5PM = moment("17:00", "HH:mm");
-    //     const before8AM = moment("8:00", "HH:mm");
-    //     const after5PM = moment("11:00", "HH:mm");
-    //     if (
-    //       !(
-    //         currentTime.isBefore(before8AM) ||
-    //         //currentTime.isBefore(after5PM) )
-    //         currentTime.isSameOrAfter(after5PM)
-    //       )
-    //     ) {
-    //       return res.status(400).json({
-    //         error: "Attendance can only be given before 8 AM or after 5 PM",
-    //       });
-    //     }
-
-    //     const existingAttendance = await attendancellection.findOne({
-    //       employee_id: staffinfo.employee_id,
-    //       attendance_date: currentTime.format("DD/MM/YY"),
-    //     });
-
-    //     if (
-    //       (currentTime.isBefore(before8AM) &&
-    //         existingAttendance?.status_in === "present") ||
-    //       (currentTime.isSameOrAfter(after5PM) &&
-    //         existingAttendance?.status_out === "present")
-    //     ) {
-    //       return res.status(400).json({
-    //         error: "Attendance already given for the specified time period",
-    //       });
-    //     }
-    //     if (currentTime.isBefore(before8AM)) {
-    //       console.log("before 8am");
-    //       staffinfo.status_in = "present";
-    //       staffinfo.attendance_in_time = currentTime.format("hh:mm A");
-    //     } else if (currentTime.isSameOrAfter(after5PM)) {
-    //       if (existingAttendance?.status_in === "present") {
-    //         console.log("update");
-    //         const updateOperation = {
-    //           $set: {
-    //             status_out: "present",
-    //             attendance_out_time: currentTime.format("hh:mm A"),
-    //           },
-    //         };
-    //         const result = await attendancellection.updateOne(
-    //           {
-    //             employee_id: staffinfo.employee_id,
-    //             attendance_date: currentTime.format("DD/MM/YY"),
-    //           },
-    //           updateOperation
-    //         );
-    //         res.send(result);
-    //       } else {
-    //         staffinfo.status_out = "present";
-    //         staffinfo.attendance_out_time = currentTime.format("hh:mm A");
-    //       }
-
-    //       console.log("after 5PM");
-    //       staffinfo.status_out = "present";
-    //       staffinfo.attendance_out_time = currentTime.format("hh:mm A");
-    //     }
-    //     // else if (currentTime.isBefore(after5PM)) {
-    //     //   console.log("after 5PM");
-    //     //   staffinfo.status_out = "present";
-    //     //   staffinfo.attendance_out_time = currentTime.format("hh:mm A");
-    //     // }
-    //     staffinfo.attendance_date = currentTime.format("DD/MM/YY");
-    //     // staffinfo.attendance_time = currentTime.format("hh:mm A");
-    //     console.log(staffinfo);
-    //     const result = await attendancellection.insertOne(staffinfo);
-    //     res.status(200).json({ success: true, message: "Attendance added" });
-    //   } catch (error) {
-    //     console.error(error);
-    //     res.status(500).json({ error: "Internal Server Error" });
-    //   }
-    // });
-
     app.post("/addAttendance", async (req, res) => {
       try {
         const staffinfo1 = req.body;
@@ -3435,7 +3554,6 @@ async function run() {
         if (!isvalidatedemployee) {
           return res.status(400).json({ error: "Invalid Employee ID" });
         }
-
         const photo = isvalidatedemployee?.photo;
         const name = isvalidatedemployee?.name;
         const staffinfo = {
@@ -3443,13 +3561,9 @@ async function run() {
           photo,
           name,
         };
-
         const currentTime = moment();
         const before8AM = moment("8:00", "HH:mm");
         const after5PM = moment("17:00", "HH:mm");
-        // const before8AM = moment("8:00", "HH:mm");
-        // const after5PM = moment("12:00", "HH:mm");
-
         if (
           !(
             currentTime.isBefore(before8AM) ||
@@ -3627,21 +3741,42 @@ async function run() {
       try {
         const page = req.query.page;
         const size = parseInt(req.query.size);
-        // const search = req.query.search;
-        // const reset = req.query.reset;
-        // const status = req.query.status;
-        // const employeeId = req.query.employeeId;
-
+        const search = req.query.search;
+        const reset = req.query.reset;
+        const status = req.query.status;
+        const employeeId = req.query.employeeId;
+        console.log(search, reset, status, employeeId);
         console.log(page, size);
         const today = new Date();
         const formattedToday = format(today, "dd/MM/yy");
         let query = { attendance_date: formattedToday };
+
+        if (employeeId !== undefined && employeeId?.length >= 1) {
+          console.log("emploo");
+          query = { attendance_date: formattedToday, employee_id: employeeId };
+        }
+        if (search?.length >= 1 && search) {
+          console.log("search");
+          query = {
+            attendance_date: formattedToday,
+            $text: { $search: search },
+          };
+        }
+        if (status && status?.length >= 1) {
+          query = {
+            attendance_date: formattedToday,
+            status_in: status,
+            status_out: status,
+          };
+        }
+
         const attendance = await attendancellection
           .find(query)
           .skip(page * size)
           .limit(size)
           .toArray();
         const count = await attendancellection.countDocuments(query);
+
         res.send({ count, attendance });
       } catch (error) {
         console.log(error);
@@ -3658,7 +3793,8 @@ async function run() {
       try {
         const page = req.query.page;
         const pageSize = parseInt(req.query.size);
-        console.log("Generating Attendance Sheet");
+        const search = req.query.employeeId;
+        const reset = req.query.reset;
         const currentMonthStart = startOfMonth(new Date());
         const currentMonthEnd = endOfMonth(new Date());
         const currentDate = new Date();
@@ -3674,8 +3810,20 @@ async function run() {
         );
         const formattedFirstDay = formatDate(firstDayOfMonth);
         const formattedLastDay = formatDate(lastDayOfMonth);
+        console.log(formattedFirstDay, formattedLastDay);
+
+        let query = {
+          isEmployee: true,
+        };
+        if (search && search?.length >= 1) {
+          query = {
+            isEmployee: true,
+            employee_id: search,
+          };
+        }
+
         const employees = await staffcollection
-          .find({ isEmployee: true })
+          .find(query)
           .skip(page * pageSize)
           .limit(pageSize)
           .toArray();
@@ -3693,7 +3841,6 @@ async function run() {
               },
             })
             .toArray();
-          console.log(attendanceRecords);
           const formattedAttendance = [];
           for (
             let day = 1;
@@ -3713,6 +3860,23 @@ async function run() {
             if (isFriday(currentDate)) {
               symbol = "*";
             }
+            if (attendanceRecord) {
+              if (
+                attendanceRecord?.status_in === "absence" &&
+                attendanceRecord?.status_out === "absence"
+              ) {
+                symbol = "A";
+              }
+              if (
+                (attendanceRecord?.status_in === "present" &&
+                  attendanceRecord?.status_out === "absence") ||
+                (attendanceRecord?.status_in === "absence" &&
+                  attendanceRecord?.status_out === "present")
+              ) {
+                symbol = "HP";
+              }
+            }
+
             formattedAttendance.push({
               date: format(currentDate, "dd/MM/yy"),
               symbol,
@@ -3736,7 +3900,408 @@ async function run() {
         res.status(500).send("Error generating Attendance Sheet.");
       }
     });
+    app.get("/singleAttendance/:employee_id", async (req, res) => {
+      try {
+        const employee_id = req.params.employee_id;
+        const currentDate = new Date();
+        const startOfMonthString = formatDate(
+          new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+        );
+        const endOfMonthString = formatDate(
+          new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+        );
+        const attendancein = await attendancellection
+          .find({
+            employee_id: employee_id,
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 6, 4] },
+                    startOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 6, 4] },
+                    endOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 3, 2] },
+                    startOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 3, 2] },
+                    endOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 0, 2] },
+                    startOfMonthString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 0, 2] },
+                    endOfMonthString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+            status_in: "present",
+          })
+          .toArray();
 
+        const attendanceout = await attendancellection
+          .find({
+            employee_id: employee_id,
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 6, 4] },
+                    startOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 6, 4] },
+                    endOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 3, 2] },
+                    startOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 3, 2] },
+                    endOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 0, 2] },
+                    startOfMonthString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 0, 2] },
+                    endOfMonthString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+            status_out: "present",
+          })
+          .toArray();
+        // const currentDate = new Date();
+        const firstDayOfNextMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0
+        );
+        const numberOfDays = firstDayOfNextMonth.getDate();
+        const status_in_present = parseInt(attendancein.length);
+        const status_out_present = parseInt(attendanceout.length);
+        const status_in_absence =
+          parseInt(numberOfDays) - parseInt(attendancein.length);
+        const status_out_absence =
+          parseInt(numberOfDays) - parseInt(attendanceout.length);
+        const result = {
+          status_in_present,
+          status_out_present,
+          status_in_absence,
+          status_out_absence,
+        };
+        res.send({ sucess: true, result });
+      } catch (error) {
+        res.send({ sucess: false });
+      }
+    });
+
+    app.get("/weekAttendance/:employee_id", async (req, res) => {
+      const employee_id = req.params.employee_id;
+      const currentDate = new Date();
+      const startOfWeek = new Date(currentDate);
+      const currentDayOfWeek = currentDate.getDay();
+      const daysUntilFriday =
+        currentDayOfWeek >= 5 ? 5 - currentDayOfWeek + 7 : 5 - currentDayOfWeek;
+      startOfWeek.setDate(currentDate.getDate() - daysUntilFriday);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      const startOfWeekString = formatDate(startOfWeek);
+      const endOfWeekString = formatDate(endOfWeek);
+      console.log(startOfWeek, endOfWeekString);
+      const attendance = await attendancellection
+        .find({
+          employee_id: employee_id,
+          $expr: {
+            $and: [
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 6, 4] },
+                  startOfWeekString.substring(6),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 6, 4] },
+                  endOfWeekString.substring(6),
+                ],
+              },
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 3, 2] },
+                  startOfWeekString.substring(3, 5),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 3, 2] },
+                  endOfWeekString.substring(3, 5),
+                ],
+              },
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 0, 2] },
+                  startOfWeekString.substring(0, 2),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 0, 2] },
+                  endOfWeekString.substring(0, 2),
+                ],
+              },
+            ],
+          },
+        })
+        .toArray();
+      console.log(employee_id, attendance);
+      const daysOfWeek = [];
+      for (
+        let day = new Date(startOfWeek);
+        day <= endOfWeek;
+        day.setDate(day.getDate() + 1)
+      ) {
+        daysOfWeek.push(formatDate(day));
+      }
+
+      const data = daysOfWeek.map((day) => {
+        const dayData = attendance.find(
+          (item) => item?.attendance_date === day
+        );
+        return {
+          name: day,
+          uv: 12,
+          duration: dayData ? parseFloat(dayData.totalDuration) : 0,
+          amt: 12,
+        };
+      });
+      console.log(startOfWeek, endOfWeek);
+      res.send(data);
+    });
+    // app.get("/monthAttendance/:employee_id", async (req, res) => {
+    //   const employee_id = req.params.employee_id;
+    //   const currentDate = new Date();
+    //   const startOfMonthString = formatDate(
+    //     new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    //   );
+    //   const endOfMonthString = formatDate(
+    //     new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+    //   );
+    //   const attendance = await attendancellection
+    //     .find({
+    //       employee_id: employee_id,
+    //       $expr: {
+    //         $and: [
+    //           {
+    //             $gte: [
+    //               { $substrCP: ["$attendance_date", 6, 4] },
+    //               startOfMonthString.substring(6),
+    //             ],
+    //           },
+    //           {
+    //             $lte: [
+    //               { $substrCP: ["$attendance_date", 6, 4] },
+    //               endOfMonthString.substring(6),
+    //             ],
+    //           },
+    //           {
+    //             $gte: [
+    //               { $substrCP: ["$attendance_date", 3, 2] },
+    //               startOfMonthString.substring(3, 5),
+    //             ],
+    //           },
+    //           {
+    //             $lte: [
+    //               { $substrCP: ["$attendance_date", 3, 2] },
+    //               endOfMonthString.substring(3, 5),
+    //             ],
+    //           },
+    //           {
+    //             $gte: [
+    //               { $substrCP: ["$attendance_date", 0, 2] },
+    //               startOfMonthString.substring(0, 2),
+    //             ],
+    //           },
+    //           {
+    //             $lte: [
+    //               { $substrCP: ["$attendance_date", 0, 2] },
+    //               endOfMonthString.substring(0, 2),
+    //             ],
+    //           },
+    //         ],
+    //       },
+    //     })
+    //     .toArray();
+    //   console.log(attendance);
+    //   const daysOfWeek = [];
+    //   for (
+    //     let day = new Date(startOfMonthString);
+    //     day <= endOfMonthString;
+    //     day.setDate(day.getDate() + 1)
+    //   ) {
+    //     daysOfWeek.push(formatDate(day));
+    //   }
+    //   console.log(daysOfWeek);
+    //   const data = daysOfWeek.map((day) => {
+    //     const dayData = attendance.find(
+    //       (item) => item?.attendance_date === day
+    //     );
+    //     return {
+    //       name: day,
+    //       uv: 12,
+    //       duration: dayData ? parseFloat(dayData.totalDuration) : 0,
+    //       amt: 12,
+    //     };
+    //   });
+    //   res.send(data);
+    // });
+    app.get("/monthAttendance/:employee_id", async (req, res) => {
+      const employee_id = req.params.employee_id;
+      const currentDate = new Date();
+      const startOfMonthString = formatDate(
+        new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+      );
+      const endOfMonthString = formatDate(
+        new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+      );
+      console.log(startOfMonthString, endOfMonthString);
+      const attendance = await attendancellection
+        .find({
+          employee_id: employee_id,
+          $expr: {
+            $and: [
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 6, 4] },
+                  startOfMonthString.substring(6),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 6, 4] },
+                  endOfMonthString.substring(6),
+                ],
+              },
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 3, 2] },
+                  startOfMonthString.substring(3, 5),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 3, 2] },
+                  endOfMonthString.substring(3, 5),
+                ],
+              },
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 0, 2] },
+                  startOfMonthString.substring(0, 2),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 0, 2] },
+                  endOfMonthString.substring(0, 2),
+                ],
+              },
+            ],
+          },
+        })
+        .toArray();
+      console.log(attendance);
+      const daysOfMonth = [];
+      const startOfMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      );
+      const endOfMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0
+      );
+
+      const startOfMonthString1 = formatDate(startOfMonth);
+      const endOfMonthString1 = formatDate(endOfMonth);
+
+      const startDate = new Date(
+        startOfMonth.getFullYear(),
+        startOfMonth.getMonth(),
+        startOfMonth.getDate(),
+        0,
+        0,
+        0,
+        0
+      );
+
+      const endDate = new Date(
+        endOfMonth.getFullYear(),
+        endOfMonth.getMonth(),
+        endOfMonth.getDate(),
+        23,
+        59,
+        59,
+        999
+      );
+
+      for (
+        let day = startDate;
+        day <= endDate;
+        day.setDate(day.getDate() + 1)
+      ) {
+        daysOfMonth.push(formatDate(new Date(day))); // Ensure proper formatting
+      }
+
+      console.log(daysOfMonth);
+      const data = daysOfMonth.map((day) => {
+        const dayData = attendance.find(
+          (item) => item?.attendance_date === day
+        );
+        return {
+          name: day.split("/")[0],
+          uv: 12,
+          duration: dayData ? parseFloat(dayData.totalDuration) : 0,
+          amt: 12,
+        };
+      });
+
+      console.log(data);
+      res.send(data);
+    });
     app.get(`/specificAttendance`, async (req, res) => {
       try {
         const employee_id = req.query.employee_id;
@@ -3751,19 +4316,62 @@ async function run() {
           currentDate.getMonth() + 1,
           0
         );
-        const formattedFirstDay = formatDate(firstDayOfMonth);
-        const formattedLastDay = formatDate(lastDayOfMonth);
-        console.log(typeof formattedFirstDay, formattedLastDay);
+        // const formattedFirstDay = formatDate(firstDayOfMonth);
+        // const formattedLastDay = formatDate(lastDayOfMonth);
+        // const currentDate = new Date();
+        const startOfMonthString = formatDate(
+          new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+        );
+        const endOfMonthString = formatDate(
+          new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+        );
+
+        // console.log(typeof formattedFirstDay, formattedLastDay);
         const attendanceThisMonth = await attendancellection
           .find({
             employee_id: employee_id,
-            attendance_date: {
-              $lte: formattedLastDay,
-              $gte: formattedFirstDay,
+            $expr: {
+              $and: [
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 6, 4] },
+                    startOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 6, 4] },
+                    endOfMonthString.substring(6),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 3, 2] },
+                    startOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 3, 2] },
+                    endOfMonthString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$attendance_date", 0, 2] },
+                    startOfMonthString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$attendance_date", 0, 2] },
+                    endOfMonthString.substring(0, 2),
+                  ],
+                },
+              ],
             },
           })
           .toArray();
-
         const employeeinfo = await staffcollection.findOne({
           employee_id: employee_id,
         });
@@ -3788,6 +4396,161 @@ async function run() {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
       }
+    });
+    app.get(`/myAttendance`, async (req, res) => {
+      try {
+        const employee_id = req.query.employee_id;
+        const attendance_date = req.query.attendance_date;
+        const reset = req.query.reset;
+        console.log("attendance_date", typeof attendance_date);
+        const currentDate = new Date();
+        const firstDayOfMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          1
+        );
+        const lastDayOfMonth = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0
+        );
+        const startOfMonthString = formatDate(
+          new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+        );
+        const endOfMonthString = formatDate(
+          new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+        );
+        let query = {
+          employee_id: employee_id,
+          $expr: {
+            $and: [
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 6, 4] },
+                  startOfMonthString.substring(6),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 6, 4] },
+                  endOfMonthString.substring(6),
+                ],
+              },
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 3, 2] },
+                  startOfMonthString.substring(3, 5),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 3, 2] },
+                  endOfMonthString.substring(3, 5),
+                ],
+              },
+              {
+                $gte: [
+                  { $substrCP: ["$attendance_date", 0, 2] },
+                  startOfMonthString.substring(0, 2),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$attendance_date", 0, 2] },
+                  endOfMonthString.substring(0, 2),
+                ],
+              },
+            ],
+          },
+        };
+        if (attendance_date && attendance_date?.length >= 1) {
+          const formattedDate = moment(attendance_date).format("DD/MM/YY");
+          console.log(formattedDate);
+          query = {
+            employee_id: employee_id,
+            attendance_date: formattedDate,
+          };
+        }
+        const attendanceThisMonth = await attendancellection
+          .find(query)
+          .toArray();
+        const employeeinfo = await staffcollection.findOne({
+          employee_id: employee_id,
+        });
+
+        const averageInTime = calculateAverageTime(
+          attendanceThisMonth.map((record) => record.attendance_in_time)
+        );
+        const averageOutTime = calculateAverageTime(
+          attendanceThisMonth.map((record) => record.attendance_out_time)
+        );
+        const averageWorkingTime =
+          calculateAverageWorkingTime(attendanceThisMonth);
+        console.log(averageInTime, averageOutTime, averageWorkingTime);
+        res.json({
+          attendanceThisMonth,
+          employeeinfo,
+          averageInTime,
+          averageOutTime,
+          averageWorkingTime,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+    app.get("/mysalary/:employee_id", async (req, res) => {
+      const employee_id = req.params.employee_id;
+      const currentYear = moment().year();
+      const startOfYear = moment().startOf("year");
+      const endOfYear = moment().endOf("year");
+      const startOfYearString = startOfYear.format("DD/MM/YYYY");
+      const endOfYearString = endOfYear.format("DD/MM/YYYY");
+      console.log(startOfYearString, endOfYearString, employee_id);
+      const orders = await salaryllection
+        .find(
+          // { employee_id: employee_id }
+          {
+            employee_id: employee_id,
+            $expr: {
+              $and: [
+                {
+                  $eq: [
+                    { $toInt: { $substrCP: ["$salary_date", 6, 4] } },
+                    currentYear,
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$salary_date", 3, 2] },
+                    startOfYearString.substring(3, 5),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$salary_date", 3, 2] },
+                    endOfYearString.substring(3, 5),
+                  ],
+                },
+                {
+                  $gte: [
+                    { $substrCP: ["$salary_date", 0, 2] },
+                    startOfYearString.substring(0, 2),
+                  ],
+                },
+                {
+                  $lte: [
+                    { $substrCP: ["$salary_date", 0, 2] },
+                    endOfYearString.substring(0, 2),
+                  ],
+                },
+              ],
+            },
+          }
+        )
+        .toArray();
+      console.log(orders);
+      res.send(orders);
     });
 
     app.put("/edit_employee-attendance/:id", async (req, res) => {
@@ -3947,6 +4710,12 @@ async function run() {
           updateOrder,
           options
         );
+        const specificDate = new Date();
+        const day = ("0" + specificDate.getDate()).slice(-2);
+        const month = ("0" + (specificDate.getMonth() + 1)).slice(-2); // Months are zero-based
+        const year = specificDate.getFullYear();
+        const formattedDate = `${day}/${month}/${year}`;
+        console.log(formattedDate);
         const salaryinfo = {
           isSalaryPaid: true,
           employee_id: employeeId,
@@ -3954,6 +4723,7 @@ async function run() {
           paymentStatus: `Paid - ${currentMonth} ${currentTime}`,
           tran_id: paymentIntent?.id,
           payId: payId,
+          salary_date: formattedDate,
         };
         const salary = await salaryllection.insertOne(salaryinfo);
         console.log(salary);
@@ -4062,8 +4832,29 @@ async function run() {
     app.get("/all_leave_requests", async (req, res) => {
       const page = req.query.page;
       const size = parseInt(req.query.size);
+      const searchvalue = req.query.searchvalue;
+      const datesearch = req.query.datesearch;
+      const rolesearch = req.query.rolesearch;
+      const reset = req.query.reset;
+      console.log(searchvalue, datesearch, rolesearch, reset);
+      let query = {};
+      if (rolesearch && rolesearch?.length >= 1) {
+        query = {
+          leave_status: rolesearch,
+        };
+      }
+      if (datesearch && datesearch?.length >= 1) {
+        query = {
+          apply_date: datesearch,
+        };
+      }
+      if (searchvalue && searchvalue?.length >= 1) {
+        query = {
+          $text: { $search: searchvalue },
+        };
+      }
       const leaves = await leavescollection
-        .find()
+        .find(query)
         .skip(page * size)
         .limit(size)
         .toArray();
@@ -4422,7 +5213,6 @@ async function run() {
           (sum, order) => sum + order.total_price,
           0
         );
-
         const customizedorders = await ordercollection
           .find({
             $expr: {
@@ -4468,7 +5258,6 @@ async function run() {
             order: "paid",
           })
           .toArray();
-
         const customizedorderscancel = await ordercollection
           .find({
             $expr: {
@@ -4513,7 +5302,6 @@ async function run() {
             },
           })
           .toArray();
-
         const monthcustomprocessing = customizedorders.filter(
           (order) => order?.status === "Processing"
         );
@@ -4530,7 +5318,6 @@ async function run() {
           (sum, order) => sum + order.total_price,
           0
         );
-
         res.json({
           orders,
           totalPrice,
@@ -4597,7 +5384,6 @@ async function run() {
             order: "paid",
           })
           .toArray();
-
         const customizedorders = await ordercollection
           .find({
             $expr: {
@@ -4686,38 +5472,6 @@ async function run() {
         totalyesterdaycustomPrice,
       });
     });
-    // app.get("/weeklyordersu", async (req, res) => {
-    //   const today = new Date();
-    //   const startOfWeek = new Date(today);
-    //   startOfWeek.setDate(today.getDate() - today.getDay());
-
-    //   const weekDates = [];
-    //   for (let i = 0; i < 7; i++) {
-    //     const currentDate = new Date(startOfWeek);
-    //     currentDate.setDate(startOfWeek.getDate() + i);
-    //     weekDates.push(currentDate.toLocaleDateString("en-GB"));
-    //   }
-
-    //   const weeklyOrdersPromises = weekDates.map(async (date) => {
-    //     const orders = await shopordercollection
-    //       .find({
-    //         order_date: date,
-    //         order: "paid",
-    //       })
-    //       .toArray();
-    //     return {
-    //       name: date,
-    //       uv: orders.length,
-    //       pv: orders.length,
-    //       amt: orders.length,
-    //     };
-    //   });
-
-    //   const weeklyOrders = await Promise.all(weeklyOrdersPromises);
-
-    //   res.send(weeklyOrders);
-    // });
-
     app.get("/weeklyordersl", async (req, res) => {
       const today = new Date();
       const dateRanges = [];
@@ -4767,6 +5521,44 @@ async function run() {
       });
       const weeklyOrders = await Promise.all(ordersPromises);
       res.send(weeklyOrders);
+    });
+    app.post("/seeting", async (req, res) => {
+      console.log("click");
+      try {
+        const seetinginfo = req.body;
+        console.log(seetinginfo);
+        const result = await settingcollection.insertOne(seetinginfo);
+        res.send({ sucess: true, result });
+      } catch (error) {
+        res.send({ sucess: false });
+      }
+    });
+    app.get("/seetinginfo", async (req, res) => {
+      const result = await settingcollection.findOne({});
+      res.send(result);
+    });
+    app.put("/seetinginfo/:id", async (req, res) => {
+      const id = req.params.id;
+      const seetinginfo = req.body;
+      console.log(id, seetinginfo);
+      const filter = { _id: new ObjectId(id) };
+      const option = { upsert: true };
+      const updatedoc = {
+        $set: {
+          company_name: seetinginfo?.company_name,
+          address: seetinginfo?.address,
+          postcode: seetinginfo?.postcode,
+          contact: seetinginfo?.contact,
+          email: seetinginfo?.email,
+          discount: seetinginfo?.discount,
+        },
+      };
+      const result = await settingcollection.updateOne(
+        filter,
+        updatedoc,
+        option
+      );
+      res.send(result);
     });
     app.get("/", (req, res) => {
       res.send("Hello Garment Management server!");
