@@ -782,18 +782,6 @@ async function run() {
         request_info?.email
       );
       const result = await ordercollection.insertOne(request_info);
-      // const product = await colorproductcollections.updateOne(
-      //   {
-      //     name: request_info?.category_name,
-      //     color_name: request_info?.colorname,
-      //   },
-      //   {
-      //     $inc: {
-      //       available: -parseInt(request_info?.pieces),
-      //     },
-      //   }
-      // );
-      // console.log(product);
       res.send(request_info);
     });
 
@@ -831,9 +819,11 @@ async function run() {
     app.post("/shoporder", async (req, res) => {
       try {
         const request_info = req.body;
+        console.log("request_info", request_info);
         const categoryproduct = request_info?.productinfo?.[0];
         const categoryname = categoryproduct?.category_name;
         const result = await shopordercollection.insertOne(request_info);
+        console.log(result);
         const userid = req.query.userid;
         sendemail(
           {
@@ -842,7 +832,6 @@ async function run() {
           },
           request_info?.email
         );
-
         try {
           const result = await usercollection.updateOne(
             { _id: new ObjectId(userid) },
@@ -852,12 +841,7 @@ async function run() {
               },
             }
           );
-
-          if (result.modifiedCount === 1) {
-          } else {
-          }
         } catch (error) {}
-
         res.send(request_info);
       } catch (error) {
         console.log(error);
@@ -1212,7 +1196,6 @@ async function run() {
     });
     app.post(`/cart_bkash_payment`, async (req, res) => {
       const confirmdata = req.body;
-
       const transictionid = new ObjectId().toString();
       const { name, email, address } = confirmdata;
       if (!email || !name || !address) {
@@ -1344,6 +1327,7 @@ async function run() {
           },
         }
       );
+
       if (result.modifiedCount > 0) {
         const orderdata = await ordercollection.findOne({
           transiction_id: transiction_id,
@@ -1418,6 +1402,7 @@ async function run() {
       console.log("/product/payment/sucess");
       const transiction_id = req.query.transiction_id;
       const orderid = parseInt(req.query.orderid);
+      const requestinfo = req.body;
       if (!transiction_id || !orderid) {
         return res.redirect(
           `${process.env.CLIENT_LINK}/product/payment/failed?orderid=${orderid}`
@@ -1435,12 +1420,20 @@ async function run() {
           },
         }
       );
+
       if (result.modifiedCount > 0) {
         const orderdata = await shopordercollection.findOne({
           transiction_id: transiction_id,
         });
-
-        console.log("/product/payment/sucess", orderdata?.productinfo);
+        const userupdate = await usercollection.updateOne(
+          { email: orderdata?.email },
+          {
+            $inc: {
+              reward: orderdata?.productinfo?.length || 0,
+            },
+          }
+        );
+        console.log("/product/payment/sucess", orderdata);
 
         for (const productInfo of orderdata?.productinfo) {
           const productId = productInfo._id;
@@ -1464,7 +1457,19 @@ async function run() {
           },
           orderdata?.email
         );
-
+        const isRewardUse = orderdata?.isRewardUse;
+        if (isRewardUse) {
+          console.log("orderdata", orderdata);
+          const userupdate = await usercollection.updateOne(
+            { email: orderdata?.email },
+            {
+              $inc: {
+                reward: -orderdata?.reward,
+              },
+            }
+          );
+          console.log(userupdate);
+        }
         res.redirect(
           `${process.env.CLIENT_LINK}/product/payment/sucess/?transiction_id=${transiction_id}`
         );
@@ -1518,10 +1523,9 @@ async function run() {
       res.send(order);
     });
     app.put(`/shoppayment/:id`, async (req, res) => {
-      console.log("shoppayment");
+      console.log("/shoppayment/:id");
       const id = parseInt(req.params.id);
       const paymentinfo = req.body;
-
       const options = { upsert: true };
       const filter = { orderid: id };
       const updateorder = {
@@ -1531,7 +1535,6 @@ async function run() {
           status: "Processing",
         },
       };
-
       const result = await shopordercollection.updateOne(
         filter,
         updateorder,
@@ -1540,13 +1543,18 @@ async function run() {
       const orderdata = await shopordercollection.findOne({
         transiction_id: paymentinfo.transiction_id,
       });
-      console.log(orderdata);
-
+      const userupdate = await usercollection.updateOne(
+        { email: orderdata?.email },
+        {
+          $inc: {
+            reward: orderdata?.productinfo?.length || 0,
+          },
+        }
+      );
       for (const productInfo of orderdata?.productinfo) {
         const productId = productInfo._id;
         const quantityToDecrease = productInfo.quentuty;
         console.log(productId, quantityToDecrease);
-
         await shopprod1uctcollection.updateOne(
           { _id: new ObjectId(productId) },
           {
@@ -1556,7 +1564,6 @@ async function run() {
           }
         );
       }
-
       sendsucessemail(
         {
           subject: `Order & Payment Sucessfully !!!`,
@@ -1564,10 +1571,23 @@ async function run() {
         },
         orderdata?.email
       );
-
+      const isRewardUse = orderdata?.isRewardUse;
+      if (isRewardUse) {
+        console.log("orderdata", orderdata);
+        const userupdate = await usercollection.updateOne(
+          { email: orderdata?.email },
+          {
+            $inc: {
+              reward: -orderdata?.reward,
+            },
+          }
+        );
+        console.log(userupdate);
+      }
       res.send(result);
     });
     app.put(`/cartpayment/:id`, async (req, res) => {
+      console.log("/cartpayment/:id");
       const id = parseInt(req.params.id);
       const paymentinfo = req.body;
       const options = { upsert: true };
@@ -1587,7 +1607,14 @@ async function run() {
       const orderdata = await shopordercollection.findOne({
         transiction_id: paymentinfo.transiction_id,
       });
-
+      const userupdate = await usercollection.updateOne(
+        { email: orderdata?.email },
+        {
+          $inc: {
+            reward: orderdata?.productinfo?.length || 0,
+          },
+        }
+      );
       for (const productInfo of orderdata?.productinfo) {
         const productId = productInfo._id;
         const quantityToDecrease = productInfo.quentuty;
@@ -1613,7 +1640,19 @@ async function run() {
         },
         orderdata?.email
       );
-
+      const isRewardUse = orderdata?.isRewardUse;
+      if (isRewardUse) {
+        console.log("orderdata", orderdata);
+        const userupdate = await usercollection.updateOne(
+          { email: orderdata?.email },
+          {
+            $inc: {
+              reward: -orderdata?.reward,
+            },
+          }
+        );
+        console.log(userupdate);
+      }
       res.send(result);
     });
     app.post("/users", async (req, res) => {
@@ -2114,6 +2153,95 @@ async function run() {
         .limit(size)
         .toArray();
       const emailproduct = await shopordercollection.find(Query).toArray();
+      console.log(emailproduct?.length);
+      let count = emailproduct?.length;
+      if (search) {
+        const idproduct = product.find((order) => order?.orderid === search);
+        product = [idproduct];
+        count = product.length;
+      }
+      res.send({ count, product });
+    });
+    app.get("/shopordercancel", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+          status: "canceled",
+        };
+      }
+      let product = await shopordercollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const emailproduct = await shopordercollection.find(Query).toArray();
+      console.log(emailproduct?.length);
+      let count = emailproduct?.length;
+      if (search) {
+        const idproduct = product.find((order) => order?.orderid === search);
+        product = [idproduct];
+        count = product.length;
+      }
+      res.send({ count, product });
+    });
+    app.get("/shopcustomoizedcancel", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+          status: "canceled",
+        };
+      }
+      let product = await ordercollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const emailproduct = await ordercollection.find(Query).toArray();
+      console.log(emailproduct?.length);
+      let count = emailproduct?.length;
+      if (search) {
+        const idproduct = product.find((order) => order?.orderid === search);
+        product = [idproduct];
+        count = product.length;
+      }
+      res.send({ count, product });
+    });
+    app.get("/myreviews", verifyjwt, async (req, res) => {
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
+      const search = parseInt(req.query.search);
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      let Query = {};
+      if (req.query.email) {
+        Query = {
+          email: req.query.email,
+        };
+      }
+      let product = await reviewcollection
+        .find(Query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const emailproduct = await reviewcollection.find(Query).toArray();
       console.log(emailproduct?.length);
       let count = emailproduct?.length;
       if (search) {
@@ -4750,6 +4878,47 @@ async function run() {
         res.status(500).send({ error: "Payment failed" });
       }
     });
+    // app.post("/addreview", async (req, res) => {
+    //   try {
+    //     const reviewinfo = req.body;
+    //     const query = {
+    //       category_id: reviewinfo?.category_id,
+    //       product_id: reviewinfo?.product_id,
+    //     };
+    //     const result = await reviewcollection.insertOne(reviewinfo);
+    //     if (result) {
+    //       const reviews = await reviewcollection.find(query).toArray();
+    //       const totalRating = reviews.reduce(
+    //         (sum, review) => sum + review.userRating,
+    //         0
+    //       );
+    //       const averageRating = Math.round(totalRating / reviews.length);
+    //       const filter = {
+    //         category_id: reviewinfo?.category_id,
+    //         product_id: reviewinfo?.product_id,
+    //       };
+    //       const option = { upsert: true };
+    //       const updatedoc = {
+    //         $set: {
+    //           averageRating: averageRating,
+    //         },
+    //       };
+    //       const updateproduct = await shopprod1uctcollection.updateOne(
+    //         filter,
+    //         updatedoc,
+    //         option
+    //       );
+    //       if ((result, updateproduct)) {
+    //         res.send({ sucess: true, result });
+    //       } else {
+    //         res.send({ success: false });
+    //       }
+    //     }
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // });
+
     app.post("/addreview", async (req, res) => {
       try {
         const reviewinfo = req.body;
@@ -4757,39 +4926,59 @@ async function run() {
           category_id: reviewinfo?.category_id,
           product_id: reviewinfo?.product_id,
         };
-        const result = await reviewcollection.insertOne(reviewinfo);
-        if (result) {
-          const reviews = await reviewcollection.find(query).toArray();
-          const totalRating = reviews.reduce(
-            (sum, review) => sum + review.userRating,
-            0
-          );
-          const averageRating = Math.round(totalRating / reviews.length);
-          const filter = {
-            category_id: reviewinfo?.category_id,
-            product_id: reviewinfo?.product_id,
-          };
-          const option = { upsert: true };
-          const updatedoc = {
-            $set: {
-              averageRating: averageRating,
+        const query1 = {
+          email: reviewinfo?.email,
+          productinfo: {
+            $elemMatch: {
+              category_id: reviewinfo?.category_id,
+              product_id: reviewinfo?.product_id,
             },
-          };
-          const updateproduct = await shopprod1uctcollection.updateOne(
-            filter,
-            updatedoc,
-            option
-          );
-          if ((result, updateproduct)) {
-            res.send({ sucess: true, result });
-          } else {
-            res.send({ success: false });
+          },
+          status: "Delivered",
+        };
+        const existorder = await shopordercollection.find(query1).toArray();
+        console.log("existorder", existorder);
+        if (existorder?.length >= 1) {
+          const result = await reviewcollection.insertOne(reviewinfo);
+          if (result) {
+            const reviews = await reviewcollection.find(query).toArray();
+            const totalRating = reviews.reduce(
+              (sum, review) => sum + review.userRating,
+              0
+            );
+            const averageRating = Math.round(totalRating / reviews.length);
+            const filter = {
+              category_id: reviewinfo?.category_id,
+              product_id: reviewinfo?.product_id,
+            };
+            const option = { upsert: true };
+            const updatedoc = {
+              $set: {
+                averageRating: averageRating,
+              },
+            };
+            const updateproduct = await shopprod1uctcollection.updateOne(
+              filter,
+              updatedoc,
+              option
+            );
+            if ((result, updateproduct)) {
+              res.send({ sucess: true, result });
+            } else {
+              res.send({ success: false });
+            }
           }
+        } else {
+          res.send({
+            success: false,
+            message: "You are not able to give the review.",
+          });
         }
       } catch (error) {
         console.log(error);
       }
     });
+
     app.post("/leave/Request", async (req, res) => {
       try {
         const leaveinfo1 = req.body;
@@ -5558,6 +5747,18 @@ async function run() {
         updatedoc,
         option
       );
+      res.send(result);
+    });
+    app.get("/bestreviews", async (req, res) => {
+      const product_id = req.query.product_id;
+      const category_id = req.query.category_id;
+      console.log(category_id, product_id);
+      const query = {
+        product_id: product_id,
+        category_id: category_id,
+        userRating: { $gte: 3 },
+      };
+      const result = await reviewcollection.find(query).toArray();
       res.send(result);
     });
     app.get("/", (req, res) => {
