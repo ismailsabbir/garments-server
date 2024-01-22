@@ -455,6 +455,10 @@ async function run() {
       .db("garmentsinformation")
       .collection("setting");
 
+    const contactcollection = client
+      .db("garmentsinformation")
+      .collection("contact");
+
     const products = await shopprod1uctcollection.find({}).toArray();
     products.forEach((product) => {
       tfidf.addDocument(product.category_name);
@@ -1034,8 +1038,7 @@ async function run() {
         .skip(page * size)
         .limit(size)
         .toArray();
-      let count = await wishlistproductcollection.estimatedDocumentCount();
-
+      let count = await wishlistproductcollection.estimatedDocumentCount(Query);
       res.send({ count, product });
     });
     app.get("/customized_orders", verifyjwt, async (req, res) => {
@@ -2578,6 +2581,22 @@ async function run() {
       const product = await usercollection.findOne(Query);
       res.send(product);
     });
+    app.get("/statistic/info", async (req, res) => {
+      const query = {};
+      const usernumber = await usercollection.countDocuments(query);
+      const partnershipcount = await partnershipcollection.countDocuments(
+        query
+      );
+      const productscount = await shopprod1uctcollection.countDocuments(query);
+      const ordercount = await shopordercollection.countDocuments(query);
+
+      res.send({
+        usernumber,
+        partnershipcount,
+        productscount,
+        ordercount,
+      });
+    });
     app.put("/userupdate", async (req, res) => {
       const email = req.query.email;
       const filter = {
@@ -3338,7 +3357,27 @@ async function run() {
         console.log("error");
       }
     });
-
+    app.delete("/delete_review", async (req, res) => {
+      const id = req.query.id;
+      const query = {
+        _id: new ObjectId(id),
+      };
+      try {
+        const result = await reviewcollection.deleteOne(query);
+        console.log(result);
+        if (result.deletedCount > 0) {
+          res.json(result);
+        } else {
+          res.status(404).json({ message: "No products found for deletion" });
+          console.log("no products found for deletion");
+        }
+      } catch (error) {
+        res
+          .status(500)
+          .json({ message: "Error deleting products", error: error.message });
+        console.log("error");
+      }
+    });
     app.delete("/delete-customized-category", async (req, res) => {
       const productIds = req.body;
       console.log(productIds);
@@ -5752,13 +5791,25 @@ async function run() {
     app.get("/bestreviews", async (req, res) => {
       const product_id = req.query.product_id;
       const category_id = req.query.category_id;
+      const page = req.query.page;
+      const size = parseInt(req.query.size);
       console.log(category_id, product_id);
       const query = {
         product_id: product_id,
         category_id: category_id,
         userRating: { $gte: 3 },
       };
-      const result = await reviewcollection.find(query).toArray();
+      const result = await reviewcollection
+        .find(query)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = await reviewcollection.countDocuments(query);
+      res.send({ result, count });
+    });
+    app.post("/contact_request", async (req, res) => {
+      const contactinfo = req.body;
+      const result = await contactcollection.insertOne(contactinfo);
       res.send(result);
     });
     app.get("/", (req, res) => {
