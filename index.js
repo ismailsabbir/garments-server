@@ -4277,83 +4277,7 @@ async function run() {
       console.log(startOfWeek, endOfWeek);
       res.send(data);
     });
-    // app.get("/monthAttendance/:employee_id", async (req, res) => {
-    //   const employee_id = req.params.employee_id;
-    //   const currentDate = new Date();
-    //   const startOfMonthString = formatDate(
-    //     new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-    //   );
-    //   const endOfMonthString = formatDate(
-    //     new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
-    //   );
-    //   const attendance = await attendancellection
-    //     .find({
-    //       employee_id: employee_id,
-    //       $expr: {
-    //         $and: [
-    //           {
-    //             $gte: [
-    //               { $substrCP: ["$attendance_date", 6, 4] },
-    //               startOfMonthString.substring(6),
-    //             ],
-    //           },
-    //           {
-    //             $lte: [
-    //               { $substrCP: ["$attendance_date", 6, 4] },
-    //               endOfMonthString.substring(6),
-    //             ],
-    //           },
-    //           {
-    //             $gte: [
-    //               { $substrCP: ["$attendance_date", 3, 2] },
-    //               startOfMonthString.substring(3, 5),
-    //             ],
-    //           },
-    //           {
-    //             $lte: [
-    //               { $substrCP: ["$attendance_date", 3, 2] },
-    //               endOfMonthString.substring(3, 5),
-    //             ],
-    //           },
-    //           {
-    //             $gte: [
-    //               { $substrCP: ["$attendance_date", 0, 2] },
-    //               startOfMonthString.substring(0, 2),
-    //             ],
-    //           },
-    //           {
-    //             $lte: [
-    //               { $substrCP: ["$attendance_date", 0, 2] },
-    //               endOfMonthString.substring(0, 2),
-    //             ],
-    //           },
-    //         ],
-    //       },
-    //     })
-    //     .toArray();
-    //   console.log(attendance);
-    //   const daysOfWeek = [];
-    //   for (
-    //     let day = new Date(startOfMonthString);
-    //     day <= endOfMonthString;
-    //     day.setDate(day.getDate() + 1)
-    //   ) {
-    //     daysOfWeek.push(formatDate(day));
-    //   }
-    //   console.log(daysOfWeek);
-    //   const data = daysOfWeek.map((day) => {
-    //     const dayData = attendance.find(
-    //       (item) => item?.attendance_date === day
-    //     );
-    //     return {
-    //       name: day,
-    //       uv: 12,
-    //       duration: dayData ? parseFloat(dayData.totalDuration) : 0,
-    //       amt: 12,
-    //     };
-    //   });
-    //   res.send(data);
-    // });
+
     app.get("/monthAttendance/:employee_id", async (req, res) => {
       const employee_id = req.params.employee_id;
       const currentDate = new Date();
@@ -4483,17 +4407,12 @@ async function run() {
           currentDate.getMonth() + 1,
           0
         );
-        // const formattedFirstDay = formatDate(firstDayOfMonth);
-        // const formattedLastDay = formatDate(lastDayOfMonth);
-        // const currentDate = new Date();
         const startOfMonthString = formatDate(
           new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
         );
         const endOfMonthString = formatDate(
           new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
         );
-
-        // console.log(typeof formattedFirstDay, formattedLastDay);
         const attendanceThisMonth = await attendancellection
           .find({
             employee_id: employee_id,
@@ -4675,46 +4594,43 @@ async function run() {
       const endOfYearString = endOfYear.format("DD/MM/YYYY");
       console.log(startOfYearString, endOfYearString, employee_id);
       const orders = await salaryllection
-        .find(
-          // { employee_id: employee_id }
-          {
-            employee_id: employee_id,
-            $expr: {
-              $and: [
-                {
-                  $eq: [
-                    { $toInt: { $substrCP: ["$salary_date", 6, 4] } },
-                    currentYear,
-                  ],
-                },
-                {
-                  $gte: [
-                    { $substrCP: ["$salary_date", 3, 2] },
-                    startOfYearString.substring(3, 5),
-                  ],
-                },
-                {
-                  $lte: [
-                    { $substrCP: ["$salary_date", 3, 2] },
-                    endOfYearString.substring(3, 5),
-                  ],
-                },
-                {
-                  $gte: [
-                    { $substrCP: ["$salary_date", 0, 2] },
-                    startOfYearString.substring(0, 2),
-                  ],
-                },
-                {
-                  $lte: [
-                    { $substrCP: ["$salary_date", 0, 2] },
-                    endOfYearString.substring(0, 2),
-                  ],
-                },
-              ],
-            },
-          }
-        )
+        .find({
+          employee_id: employee_id,
+          $expr: {
+            $and: [
+              {
+                $eq: [
+                  { $toInt: { $substrCP: ["$salary_date", 6, 4] } },
+                  currentYear,
+                ],
+              },
+              {
+                $gte: [
+                  { $substrCP: ["$salary_date", 3, 2] },
+                  startOfYearString.substring(3, 5),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$salary_date", 3, 2] },
+                  endOfYearString.substring(3, 5),
+                ],
+              },
+              {
+                $gte: [
+                  { $substrCP: ["$salary_date", 0, 2] },
+                  startOfYearString.substring(0, 2),
+                ],
+              },
+              {
+                $lte: [
+                  { $substrCP: ["$salary_date", 0, 2] },
+                  endOfYearString.substring(0, 2),
+                ],
+              },
+            ],
+          },
+        })
         .toArray();
       console.log(orders);
       res.send(orders);
@@ -4917,46 +4833,6 @@ async function run() {
         res.status(500).send({ error: "Payment failed" });
       }
     });
-    // app.post("/addreview", async (req, res) => {
-    //   try {
-    //     const reviewinfo = req.body;
-    //     const query = {
-    //       category_id: reviewinfo?.category_id,
-    //       product_id: reviewinfo?.product_id,
-    //     };
-    //     const result = await reviewcollection.insertOne(reviewinfo);
-    //     if (result) {
-    //       const reviews = await reviewcollection.find(query).toArray();
-    //       const totalRating = reviews.reduce(
-    //         (sum, review) => sum + review.userRating,
-    //         0
-    //       );
-    //       const averageRating = Math.round(totalRating / reviews.length);
-    //       const filter = {
-    //         category_id: reviewinfo?.category_id,
-    //         product_id: reviewinfo?.product_id,
-    //       };
-    //       const option = { upsert: true };
-    //       const updatedoc = {
-    //         $set: {
-    //           averageRating: averageRating,
-    //         },
-    //       };
-    //       const updateproduct = await shopprod1uctcollection.updateOne(
-    //         filter,
-    //         updatedoc,
-    //         option
-    //       );
-    //       if ((result, updateproduct)) {
-    //         res.send({ sucess: true, result });
-    //       } else {
-    //         res.send({ success: false });
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // });
 
     app.post("/addreview", async (req, res) => {
       try {
