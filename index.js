@@ -5593,6 +5593,8 @@ async function run() {
     });
     app.listen(port, () => {
       console.log(`Example app listening on port ${port}`);
+      console.log(process.env.SERVER_LINK);
+      console.log(process.env.CLIENT_LINK);
     });
   } catch (error) {
     console.log(error);
