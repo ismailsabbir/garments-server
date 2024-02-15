@@ -3687,6 +3687,104 @@ async function run() {
         res.send(result);
       } catch (err) {}
     });
+    // app.post("/addAttendance", async (req, res) => {
+    //   try {
+    //     const staffinfo1 = req.body;
+    //     const isvalidatedemployee = await staffcollection.findOne({
+    //       employee_id: staffinfo1.employee_id,
+    //     });
+    //     if (!isvalidatedemployee) {
+    //       return res.status(400).json({ error: "Invalid Employee ID" });
+    //     }
+    //     const photo = isvalidatedemployee?.photo;
+    //     const name = isvalidatedemployee?.name;
+    //     const staffinfo = {
+    //       ...staffinfo1,
+    //       photo,
+    //       name,
+    //     };
+    //     const currentTime = moment();
+    //     console.log(currentTime.format("hh:mm A"));
+    //     const before8AM = moment("8:00", "HH:mm");
+    //     const after5PM = moment("17:00", "HH:mm");
+    //     if (
+    //       !(
+    //         currentTime.isBefore(before8AM) ||
+    //         currentTime.isSameOrAfter(after5PM)
+    //       )
+    //     ) {
+    //       return res.status(400).json({
+    //         error: "Attendance can only be given before 8 AM or after 5 PM",
+    //       });
+    //     }
+    //     const existingAttendance = await attendancellection.findOne({
+    //       employee_id: staffinfo.employee_id,
+    //       attendance_date: currentTime.format("DD/MM/YY"),
+    //     });
+    //     if (
+    //       (currentTime.isBefore(before8AM) &&
+    //         existingAttendance?.status_in === "present") ||
+    //       (currentTime.isSameOrAfter(after5PM) &&
+    //         existingAttendance?.status_out === "present")
+    //     ) {
+    //       return res.status(400).json({
+    //         error: "Attendance already given for the specified time period",
+    //       });
+    //     }
+    //     if (currentTime.isBefore(before8AM)) {
+    //       staffinfo.status_in = "present";
+    //       staffinfo.status_out = "absence";
+    //       staffinfo.attendance_in_time = currentTime.format("hh:mm A");
+    //       staffinfo.attendance_out_time = "13:00 PM";
+    //       staffinfo.totalDuration = calculateTotalTime(
+    //         staffinfo.attendance_in_time,
+    //         staffinfo.attendance_out_time
+    //       );
+    //     } else if (currentTime.isSameOrAfter(after5PM)) {
+    //       if (existingAttendance?.status_in === "present") {
+    //         const totalDuration = calculateTotalTime(
+    //           existingAttendance?.attendance_in_time,
+    //           currentTime.format("hh:mm A")
+    //         );
+    //         const updateOperation = {
+    //           $set: {
+    //             status_out: "present",
+    //             attendance_out_time: currentTime.format("hh:mm A"),
+    //             totalDuration,
+    //           },
+    //         };
+    //         const result = await attendancellection.updateOne(
+    //           {
+    //             employee_id: staffinfo.employee_id,
+    //             attendance_date: currentTime.format("DD/MM/YY"),
+    //           },
+    //           updateOperation
+    //         );
+    //         return res
+    //           .status(200)
+    //           .json({ success: true, message: "Attendance updated" });
+    //       } else {
+    //         staffinfo.status_out = "present";
+    //         staffinfo.status_in = "absence";
+    //         staffinfo.attendance_out_time = currentTime.format("hh:mm A");
+    //         staffinfo.attendance_in_time = "13:00 AM";
+    //         staffinfo.totalDuration = calculateTotalTime(
+    //           staffinfo.attendance_in_time,
+    //           staffinfo.attendance_out_time
+    //         );
+    //       }
+    //       staffinfo.status_out = "present";
+    //       staffinfo.attendance_out_time = currentTime.format("hh:mm A");
+    //     }
+    //     staffinfo.attendance_date = currentTime.format("DD/MM/YY");
+    //     const result = await attendancellection.insertOne(staffinfo);
+    //     res.status(200).json({ success: true, message: "Attendance added" });
+    //   } catch (error) {
+    //     console.error(error);
+    //     res.status(500).json({ error: "Internal Server Error" });
+    //   }
+    // });
+
     app.post("/addAttendance", async (req, res) => {
       try {
         const staffinfo1 = req.body;
@@ -3704,18 +3802,9 @@ async function run() {
           name,
         };
         const currentTime = moment();
-        const before8AM = moment("8:00", "HH:mm");
-        const after5PM = moment("17:00", "HH:mm");
-        if (
-          !(
-            currentTime.isBefore(before8AM) ||
-            currentTime.isSameOrAfter(after5PM)
-          )
-        ) {
-          return res.status(400).json({
-            error: "Attendance can only be given before 8 AM or after 5 PM",
-          });
-        }
+        const before8AM = moment("11:59", "HH:mm");
+        const after5PM = moment("12:00", "HH:mm");
+
         const existingAttendance = await attendancellection.findOne({
           employee_id: staffinfo.employee_id,
           attendance_date: currentTime.format("DD/MM/YY"),
